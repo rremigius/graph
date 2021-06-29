@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+
+		<script src="../dist/graph.js"></script>
+		<style>
+			body {
+				padding: 0;
+				margin: 0;
+			}
+			#graph {
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="graph"></div>
+
+		<script type="text/javascript">
+			const graph = new window.Graph(document.getElementById('graph'));
+			graph.setData({
+				nodes: [{
+					gid: 'foo',
+					labels: ['Foo']
+				}, {
+					gid: 'bar',
+					labels: ['Bar']
+				}],
+				relations: [{
+					gid: 'foobar',
+					type: 'FOOBAR',
+					source: {gid: 'foo'},
+					target: {gid: 'bar'}
+				}]
+			});
+		</script>
+	</body>
+</html>
