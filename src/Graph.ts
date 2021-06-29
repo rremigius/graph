@@ -89,13 +89,12 @@ export default class Graph {
 	}
 
 	applyLayout() {
-		this.cy.nodes()
-			.filter(node => {
-				return !this.getNodeModel(node).fixed
-			})
-			.layout({
-				name: 'fcose'
-			}).run();
+		this.cy.filter(ele => {
+			if(ele.isEdge()) return true;
+			if(ele.isNode()) return !this.getNodeModel(ele).fixed;
+		}).layout({
+			name: 'fcose'
+		}).run();
 	}
 
 	private addNode(node:NodeModel) {
