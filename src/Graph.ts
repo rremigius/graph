@@ -1,16 +1,16 @@
 import cytoscape from "cytoscape";
 import GraphModel from "./models/GraphModel";
-import {MozelFactory, schema, deep} from "mozel";
+import {deep, MozelFactory, schema} from "mozel";
 import NodeModel from "./models/NodeModel";
 import RelationModel from "./models/RelationModel";
-import {check, instanceOf} from "validation-kit";
+import {alphanumeric, check, instanceOf} from "validation-kit";
 import {debounce} from "lodash";
 
 import log from "./Log";
-
 // @ts-ignore
 import fcose from "cytoscape-fcose";
 import {MozelData} from "mozel/dist/Mozel";
+import EntityModel from "./models/EntityModel";
 
 cytoscape.use(fcose);
 
@@ -26,6 +26,7 @@ export default class Graph {
 	private modelFactory:GraphModelFactory;
 
 	private debouncedLayout = debounce(this.applyLayout.bind(this));
+	private updatesNextTick:Record<alphanumeric, EntityModel> = {};
 
 	public readonly model:GraphModel;
 
@@ -57,8 +58,7 @@ export default class Graph {
 			if(!(newValue instanceof NodeModel) || !(oldValue instanceof NodeModel)) return;
 			if(newValue.gid !== oldValue.gid) return;
 
-			// TODO: collect all changes before updating node
-			this.updateNode(newValue);
+			this.updateNextTick(newValue);
 		}, {deep});
 	}
 
@@ -70,6 +70,7 @@ export default class Graph {
 	}
 
 	setData(data:MozelData<GraphModel>) {
+		log.log("Settin data", data);
 		this.model.$setData(data);
 	}
 
@@ -82,7 +83,7 @@ export default class Graph {
 	}
 
 	updateNodes() {
-		log.info("Updating nodes");
+		log.log("Updating nodes");
 
 		// Remove node elements that have no counterpart in model
 		this.cy.nodes()
@@ -93,20 +94,44 @@ export default class Graph {
 		this.model.nodes.each(node => {
 			const el = this.findNodeElement(node);
 			if(!el.length) {
-				this.addNode(node);
+				this.addNodeElement(node);
 			}
 		});
 
 		this.debouncedLayout();
 	}
 
-	updateNode(node:NodeModel) {
+	updateNextTick(entity:EntityModel) {
+		log.log(`Updating entity ${entity.gid} next tick.`);
+		this.updatesNextTick[entity.gid] = entity;
+		setTimeout(()=>{
+			const numUpdates = Object.keys(this.updatesNextTick).length;
+			if(!numUpdates) return; // already done
+			log.log(`Applying ${numUpdates} scheduled updates this tick.`);
+
+			for(let gid in this.updatesNextTick) {
+				const entity = this.updatesNextTick[gid];
+				if(entity instanceof NodeModel) this.updateNodeElement(entity);
+				if(entity instanceof RelationModel) this.updateEdgeElement(entity);
+			}
+			// Clear updates
+			this.updatesNextTick = {};
+		})
+	}
+
+	updateNodeElement(node:NodeModel) {
+		log.log("Updating node element");
 		const ele = this.getNodeElement(node);
 		ele.position({x: node.x, y: node.y});
 	}
 
+	updateEdgeElement(relation:RelationModel) {
+		log.log("Updating edge element");
+		// nothing yet
+	}
+
 	updateRelations() {
-		log.info("Updating relations");
+		log.log("Updating relations");
 
 		// Remove relation elements that have no counterpart in model
 		this.cy.edges()
@@ -117,7 +142,7 @@ export default class Graph {
 		this.model.relations.each(relation => {
 			const el = this.findRelationElement(relation);
 			if(!el.length) {
-				this.addRelation(relation);
+				this.addEdgeElement(relation);
 			}
 		});
 
@@ -130,7 +155,7 @@ export default class Graph {
 			if(ele.isEdge()) return !this.isFixedEdge(ele);
 			return false;
 		});
-		log.info(`Applying layout to ${elements.nodes().length} nodes.`);
+		log.log(`Applying layout to ${elements.nodes().length} nodes.`);
 
 		const options = {
 			name: 'fcose',
@@ -151,6 +176,7 @@ export default class Graph {
 	}
 
 	private fixNode(ele:cytoscape.NodeSingular) {
+		log.log(`Fixing node`);
 		const node = this.getNodeModel(ele);
 		if(!node) return;
 		const {x,y} = ele.position(); // make a copy of the values, because the cytoscape position will update after setting the first coordinate
@@ -160,7 +186,8 @@ export default class Graph {
 		return node;
 	}
 
-	private addNode(node:NodeModel) {
+	private addNodeElement(node:NodeModel) {
+		log.log(`Adding node element`);
 		return this.cy.add({
 			group: 'nodes',
 			data: {
@@ -169,7 +196,8 @@ export default class Graph {
 		});
 	}
 
-	private addRelation(relation:RelationModel) {
+	private addEdgeElement(relation:RelationModel) {
+		log.log(`Adding edge element`);
 		return this.cy.add({
 			group: 'edges',
 			data: {
