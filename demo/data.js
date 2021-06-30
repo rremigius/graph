@@ -8,9 +8,7 @@ window.DATA = {
 			"labels": [
 				"BBB"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {name: 'BBB1'}
 		},
 		{
 			"gid": 49841,
@@ -20,9 +18,7 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 42441,
@@ -32,9 +28,7 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46929,
@@ -44,9 +38,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46715,
@@ -56,9 +48,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46926,
@@ -68,9 +58,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {name: 'AAA1'}
 		},
 		{
 			"gid": 49711,
@@ -80,9 +68,7 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49048,
@@ -92,9 +78,7 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 44599,
@@ -104,9 +88,7 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 42919,
@@ -116,9 +98,7 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49086,
@@ -128,9 +108,7 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46927,
@@ -140,9 +118,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {name: 'AAA2'}
 		},
 		{
 			"gid": 46928,
@@ -152,9 +128,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 44633,
@@ -164,9 +138,7 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49609,
@@ -176,9 +148,7 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 44369,
@@ -188,9 +158,7 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46874,
@@ -200,9 +168,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 47137,
@@ -212,9 +178,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 47136,
@@ -224,9 +188,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 45970,
@@ -236,9 +198,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 45746,
@@ -248,9 +208,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46567,
@@ -260,9 +218,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46434,
@@ -272,9 +228,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 46566,
@@ -284,9 +238,7 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		}
 	],
 	"relations": [
@@ -295,360 +247,300 @@ window.DATA = {
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 45573},
 			"target": {gid: 49841},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 56980,
 			"meta": {
 				"store": "data"
 			},
-			"type": "YYY",
+			"labels": ["YYY"],
 			"source": {gid: 42441},
 			"target": {gid: 45573},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53758,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42441},
 			"target": {gid: 46929},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 51794,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42441},
 			"target": {gid: 46715},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {name: 'XXX1'}
 		},
 		{
 			"gid": 61434,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46929},
 			"target": {gid: 49841},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53070,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46929},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53069,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46929},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 57929,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46715},
 			"target": {gid: 49711},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 57930,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46715},
 			"target": {gid: 49048},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 51792,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44599},
 			"target": {gid: 46715},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 51793,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 46715},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 61429,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46926},
 			"target": {gid: 49086},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {name: 'ZZZ1'}
 		},
 		{
 			"gid": 53065,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46927},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53067,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46928},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53064,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44633},
 			"target": {gid: 46926},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53063,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44633},
 			"target": {gid: 46926},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53068,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46928},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 53066,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 46926},
 			"target": {gid: 46927},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 61431,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46927},
 			"target": {gid: 49609},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 61432,
 			"meta": {
 				"store": "data"
 			},
-			"type": "ZZZ",
+			"labels": ["ZZZ"],
 			"source": {gid: 46928},
 			"target": {gid: 49609},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 55425,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44369},
 			"target": {gid: 46928},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 55634,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44599},
 			"target": {gid: 46874},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 54140,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44599},
 			"target": {gid: 47137},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 54134,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 44599},
 			"target": {gid: 47136},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49042,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 45970},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 52452,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 45746},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 51757,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 46567},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49680,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 46434},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 51009,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 46566},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		},
 		{
 			"gid": 49043,
 			"meta": {
 				"store": "data"
 			},
-			"type": "XXX",
+			"labels": ["XXX"],
 			"source": {gid: 42919},
 			"target": {gid: 45970},
-			"properties": {},
-			"visible": true,
-			"selected": true
+			"data": {}
 		}
 	]
 }

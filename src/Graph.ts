@@ -3,8 +3,8 @@ import GraphModel from "./models/GraphModel";
 import {deep, MozelFactory, schema} from "mozel";
 import NodeModel from "./models/NodeModel";
 import RelationModel from "./models/RelationModel";
-import {alphanumeric, check, instanceOf} from "validation-kit";
-import {debounce} from "lodash";
+import {alphanumeric} from "validation-kit";
+import {debounce, isEmpty, forEach, includes, isPlainObject} from "lodash";
 
 import log from "./Log";
 // @ts-ignore
@@ -14,6 +14,10 @@ import EntityModel from "./models/EntityModel";
 
 cytoscape.use(fcose);
 
+export type GraphOptions = {
+	elementData?:(entity:EntityModel)=>object;
+};
+
 class GraphModelFactory extends MozelFactory {
 	initDependencies(): void {
 		this.register(NodeModel);
@@ -22,23 +26,49 @@ class GraphModelFactory extends MozelFactory {
 }
 
 export default class Graph {
-	private cy:cytoscape.Core;
+	static get cytoscape() {
+		return cytoscape;
+	}
+	static getLabel(entity:EntityModel) {
+		if(entity.data && !isEmpty(entity.data.name)) return entity.data.name;
+		if(entity.labels.length) {
+			return entity.labels.toArray().join(':');
+		}
+		return '';
+	}
 	private modelFactory:GraphModelFactory;
 
 	private debouncedLayout = debounce(this.applyLayout.bind(this));
 	private updatesNextTick:Record<alphanumeric, EntityModel> = {};
+	private readonly initializing:Promise<any> = undefined;
+	private readonly options:GraphOptions;
+
+	/**
+	 * Returns whether the Graph has been setup and is ready to take data.
+	 */
+	public get initialized() {
+		return this.initializing;
+	}
 
 	public readonly model:GraphModel;
+	public readonly cy:cytoscape.Core;
 
-	constructor(container:HTMLElement) {
-		check(container, instanceOf(HTMLElement), "HTMLElement", "container");
-		this.cy = cytoscape({
-			container: container
-		});
+	constructor(options?:cytoscape.CytoscapeOptions & GraphOptions) {
+		this.cy = cytoscape(options);
 		this.modelFactory = new GraphModelFactory();
 		this.model = this.modelFactory.create(GraphModel);
 		this.initWatchers();
 		this.initInteractions();
+
+		this.options = options || {};
+
+		// Use options
+		if(options.style instanceof Promise) {
+			this.initializing = options.style;
+		}
+		if(options.elementData) {
+			this.getElementData = options.elementData;
+		}
 	}
 
 	initWatchers() {
@@ -70,7 +100,7 @@ export default class Graph {
 	}
 
 	setData(data:MozelData<GraphModel>) {
-		log.log("Settin data", data);
+		log.log("Setting data", data);
 		this.model.$setData(data);
 	}
 
@@ -102,11 +132,13 @@ export default class Graph {
 	}
 
 	updateNextTick(entity:EntityModel) {
-		log.log(`Updating entity ${entity.gid} next tick.`);
+		log.log(`Updating entity next tick: ${entity}`);
 		this.updatesNextTick[entity.gid] = entity;
+
 		setTimeout(()=>{
 			const numUpdates = Object.keys(this.updatesNextTick).length;
 			if(!numUpdates) return; // already done
+
 			log.log(`Applying ${numUpdates} scheduled updates this tick.`);
 
 			for(let gid in this.updatesNextTick) {
@@ -120,14 +152,46 @@ export default class Graph {
 	}
 
 	updateNodeElement(node:NodeModel) {
-		log.log("Updating node element");
+		log.log(`Updating node element: ${node}`);
 		const ele = this.getNodeElement(node);
-		ele.position({x: node.x, y: node.y});
+		if(!ele) {
+			log.error(`No node element found for ${node}`);
+			return;
+		}
+
+		// Set position
+		ele.position({x: node.x || 0, y: node.y || 0});
+
+		// Set data
+		let data = this.getElementData(node);
+		if(!isPlainObject(data)) data = {};
+		forEach(data, (value, key) => {
+			if(includes(['id', 'classes', 'gid'], key)) return; // reserved keys
+			ele.data(key, value);
+		});
+
+		// Set GID
+		ele.data('gid', node.gid);
 	}
 
 	updateEdgeElement(relation:RelationModel) {
-		log.log("Updating edge element");
-		// nothing yet
+		log.log(`Updating edge element: ${relation}`);
+		const ele = this.getEdgeElement(relation);
+		if(!ele) {
+			log.error(`No edge element found for ${relation}`);
+			return;
+		}
+
+		// Set data
+		let data = this.getElementData(relation);
+		if(!isPlainObject(data)) data = {};
+		forEach(data, (value, key) => {
+			if(includes(['id', 'classes', 'source', 'target', 'gid'], key)) return; // reserved keys
+			ele.data(key, value);
+		});
+
+		// Set GID
+		ele.data('gid', relation.gid);
 	}
 
 	updateRelations() {
@@ -151,8 +215,8 @@ export default class Graph {
 
 	async applyLayout() {
 		const elements = this.cy.filter(ele => {
-			if(ele.isNode()) return !this.isFixedNode(ele);
-			if(ele.isEdge()) return !this.isFixedEdge(ele);
+			if(ele.isNode()) return !this.isFixedNodeElement(ele);
+			if(ele.isEdge()) return !this.isFixedEdgeElement(ele);
 			return false;
 		});
 		log.log(`Applying layout to ${elements.nodes().length} nodes.`);
@@ -169,15 +233,16 @@ export default class Graph {
 		this.fixNodes(elements.nodes());
 	}
 
-	private fixNodes(nodes:cytoscape.NodeCollection) {
+	fixNodes(nodes:cytoscape.NodeCollection) {
 		nodes.each(ele => {
 			this.fixNode(ele);
 		});
 	}
 
-	private fixNode(ele:cytoscape.NodeSingular) {
-		log.log(`Fixing node`);
+	fixNode(ele:cytoscape.NodeSingular) {
 		const node = this.getNodeModel(ele);
+		log.log(`Fixing node: ${node}`);
+
 		if(!node) return;
 		const {x,y} = ele.position(); // make a copy of the values, because the cytoscape position will update after setting the first coordinate
 		node.x = x;
@@ -186,19 +251,21 @@ export default class Graph {
 		return node;
 	}
 
-	private addNodeElement(node:NodeModel) {
-		log.log(`Adding node element`);
-		return this.cy.add({
+	addNodeElement(node:NodeModel) {
+		log.log(`Adding node element: ${node}`);
+		const ele = this.cy.add({
 			group: 'nodes',
 			data: {
 				id: node.gid.toString()
 			}
 		});
+		this.updateNodeElement(node);
+		return ele;
 	}
 
-	private addEdgeElement(relation:RelationModel) {
-		log.log(`Adding edge element`);
-		return this.cy.add({
+	addEdgeElement(relation:RelationModel) {
+		log.log(`Adding edge element: ${relation}`);
+		const ele = this.cy.add({
 			group: 'edges',
 			data: {
 				id: relation.gid.toString(),
@@ -206,33 +273,39 @@ export default class Graph {
 				target: relation.target.gid.toString()
 			}
 		});
+		this.updateEdgeElement(relation);
+		return ele;
 	}
 
-	private getNodeModel(nodeElement:cytoscape.NodeSingular) {
+	getNodeModel(nodeElement:cytoscape.NodeSingular) {
 		return this.model.nodes.find((node:NodeModel) => node.gid.toString() === nodeElement.id());
 	}
 
-	private getRelationModel(edge:cytoscape.EdgeSingular) {
+	getRelationModel(edge:cytoscape.EdgeSingular) {
 		return this.model.relations.find((relation:RelationModel) => relation.gid.toString() === edge.id());
 	}
 
-	private isFixedNode(ele:cytoscape.NodeSingular) {
+	isFixedNodeElement(ele:cytoscape.NodeSingular) {
 		return this.getNodeModel(ele).fixed === true;
 	}
 
-	private isFixedEdge(ele:cytoscape.EdgeSingular) {
+	isFixedEdgeElement(ele:cytoscape.EdgeSingular) {
 		const source = ele.source();
 		const target = ele.target();
-		return this.isFixedNode(source) && this.isFixedNode(target);
+		return this.isFixedNodeElement(source) && this.isFixedNodeElement(target);
 	}
 
-	private getNodeElement(node:NodeModel):cytoscape.NodeSingular|undefined {
+	getNodeElement(node:NodeModel):cytoscape.NodeSingular|undefined {
 		const ele = this.cy.getElementById(node.gid.toString());
 		return ele.isNode() ? ele : undefined;
 	}
 
-	private getEdgeElement(relation:NodeModel):cytoscape.EdgeSingular|undefined {
+	getEdgeElement(relation:NodeModel):cytoscape.EdgeSingular|undefined {
 		const ele = this.cy.getElementById(relation.gid.toString());
 		return ele.isEdge() ? ele : undefined;
+	}
+
+	getElementData(entity:EntityModel) {
+		return entity.data.$export();
 	}
 }
