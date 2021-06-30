@@ -4,10 +4,13 @@ import {MozelFactory, schema} from "mozel";
 import NodeModel from "./models/NodeModel";
 import RelationModel from "./models/RelationModel";
 import {check, instanceOf} from "validation-kit";
-import {MozelData} from "mozel/dist/Mozel";
+import {throttle} from "lodash";
+
+import log from "./Log";
 
 // @ts-ignore
 import fcose from "cytoscape-fcose";
+import {MozelData} from "mozel/dist/Mozel";
 
 cytoscape.use(fcose);
 
@@ -22,6 +25,8 @@ export default class Graph {
 	private cy:cytoscape.Core;
 	private modelFactory:GraphModelFactory;
 
+	private throttledLayout = throttle(this.applyLayout.bind(this), 0, {leading: false});
+
 	public readonly model:GraphModel;
 
 	constructor(container:HTMLElement) {
@@ -35,14 +40,16 @@ export default class Graph {
 	}
 
 	initWatchers() {
-
+		this.model.$watch(schema(GraphModel).nodes.$ + '.*', () => {
+			this.updateNodes();
+		}, {debounce: 0});
+		this.model.$watch(schema(GraphModel).relations.$ + '.*', () => {
+			this.updateRelations();
+		}, {debounce: 0})
 	}
 
-	setData(data:{nodes?:MozelData<NodeModel>[], relations?:MozelData<RelationModel>[]}) {
-		this.model.nodes.setData(data.nodes, true);
-		this.model.relations.setData(data.relations, true);
-		this.forceUpdate();
-		this.applyLayout();
+	setData(data:MozelData<GraphModel>) {
+		this.model.$setData(data);
 	}
 
 	findNodeElement(node:NodeModel) {
@@ -53,12 +60,9 @@ export default class Graph {
 		return this.cy.$id(relation.gid.toString());
 	}
 
-	forceUpdate() {
-		this.updateNodes();
-		this.updateRelations();
-	}
-
 	updateNodes() {
+		log.info("Updating nodes");
+
 		// Remove node elements that have no counterpart in model
 		this.cy.nodes()
 			.filter(node => !this.getNodeModel(node))
@@ -71,9 +75,13 @@ export default class Graph {
 				this.addNode(node);
 			}
 		});
+
+		this.throttledLayout();
 	}
 
 	updateRelations() {
+		log.info("Updating relations");
+
 		// Remove relation elements that have no counterpart in model
 		this.cy.edges()
 			.filter(edge => !this.getRelationModel(edge))
@@ -86,15 +94,36 @@ export default class Graph {
 				this.addRelation(relation);
 			}
 		});
+
+		this.throttledLayout();
 	}
 
-	applyLayout() {
-		this.cy.filter(ele => {
-			if(ele.isEdge()) return true;
-			if(ele.isNode()) return !this.getNodeModel(ele).fixed;
-		}).layout({
-			name: 'fcose'
-		}).run();
+	async applyLayout() {
+		const elements = this.cy.filter(ele => {
+			if(ele.isNode()) return !this.isFixedNode(ele);
+			if(ele.isEdge()) return !this.isFixedEdge(ele);
+			return false;
+		});
+		log.info(`Applying layout to ${elements.nodes().length} nodes.`);
+
+		const options = {
+			name: 'fcose',
+			fit: elements.nodes().length === this.cy.nodes().length // don't fit when applying partial layout
+		} as any; // TS: otherwise BaseLayout does not accept enough options
+
+		const layout = elements.layout(options);
+		layout.run();
+
+		await layout.promiseOn('layoutstop');
+		this.fixNodes(elements.nodes());
+	}
+
+	private fixNodes(nodes:cytoscape.NodeCollection) {
+		nodes.each(ele => {
+			const node = this.getNodeModel(ele);
+			if(!node) return;
+			node.fixed = true;
+		});
 	}
 
 	private addNode(node:NodeModel) {
@@ -118,12 +147,20 @@ export default class Graph {
 	}
 
 	private getNodeModel(nodeElement:cytoscape.NodeSingular) {
-		// using toArray because Collection.find does not work (yet)
-		return this.model.nodes.toArray().find((node:NodeModel) => node.gid.toString() === nodeElement.id());
+		return this.model.nodes.find((node:NodeModel) => node.gid.toString() === nodeElement.id());
 	}
 
 	private getRelationModel(edge:cytoscape.EdgeSingular) {
-		// using toArray because Collection.find does not work (yet)
-		return this.model.relations.toArray().find((relation:RelationModel) => relation.gid.toString() === edge.id());
+		return this.model.relations.find((relation:RelationModel) => relation.gid.toString() === edge.id());
+	}
+
+	private isFixedNode(ele:cytoscape.NodeSingular) {
+		return this.getNodeModel(ele).fixed === true;
+	}
+
+	private isFixedEdge(ele:cytoscape.EdgeSingular) {
+		const source = ele.source();
+		const target = ele.target();
+		return this.isFixedNode(source) && this.isFixedNode(target);
 	}
 }

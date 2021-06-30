@@ -8,7 +8,8 @@
     "cytoscape": "^3.19.0",
     "cytoscape-fcose": "^2.1.0",
     "lodash": "^4.17.21",
-    "mozel": "0.0.19",
+    "log-control": "0.0.2",
+    "mozel": "git+https://github.com/rremigius/mozel.git",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.4",
     "validation-kit": "0.0.7"
