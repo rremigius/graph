@@ -1,10 +1,10 @@
 import cytoscape from "cytoscape";
 import GraphModel from "./models/GraphModel";
-import {MozelFactory, schema} from "mozel";
+import {MozelFactory, schema, deep} from "mozel";
 import NodeModel from "./models/NodeModel";
 import RelationModel from "./models/RelationModel";
 import {check, instanceOf} from "validation-kit";
-import {throttle} from "lodash";
+import {debounce} from "lodash";
 
 import log from "./Log";
 
@@ -25,7 +25,7 @@ export default class Graph {
 	private cy:cytoscape.Core;
 	private modelFactory:GraphModelFactory;
 
-	private throttledLayout = throttle(this.applyLayout.bind(this), 0, {leading: false});
+	private debouncedLayout = debounce(this.applyLayout.bind(this));
 
 	public readonly model:GraphModel;
 
@@ -37,15 +37,36 @@ export default class Graph {
 		this.modelFactory = new GraphModelFactory();
 		this.model = this.modelFactory.create(GraphModel);
 		this.initWatchers();
+		this.initInteractions();
 	}
 
 	initWatchers() {
+		// Watch nodes
 		this.model.$watch(schema(GraphModel).nodes.$ + '.*', () => {
 			this.updateNodes();
 		}, {debounce: 0});
+
+		// Watch relations
 		this.model.$watch(schema(GraphModel).relations.$ + '.*', () => {
 			this.updateRelations();
-		}, {debounce: 0})
+		}, {debounce: 0});
+
+		// Watch node properties
+		this.model.$watch(schema(GraphModel).nodes.$ + '.*', ({newValue, oldValue}) => {
+			// These changes are for the shallow watcher to handle
+			if(!(newValue instanceof NodeModel) || !(oldValue instanceof NodeModel)) return;
+			if(newValue.gid !== oldValue.gid) return;
+
+			// TODO: collect all changes before updating node
+			this.updateNode(newValue);
+		}, {deep});
+	}
+
+	initInteractions() {
+		// When a node is dropped
+		this.cy.on('free', event => {
+			this.fixNode(event.target);
+		});
 	}
 
 	setData(data:MozelData<GraphModel>) {
@@ -76,7 +97,12 @@ export default class Graph {
 			}
 		});
 
-		this.throttledLayout();
+		this.debouncedLayout();
+	}
+
+	updateNode(node:NodeModel) {
+		const ele = this.getNodeElement(node);
+		ele.position({x: node.x, y: node.y});
 	}
 
 	updateRelations() {
@@ -95,7 +121,7 @@ export default class Graph {
 			}
 		});
 
-		this.throttledLayout();
+		this.debouncedLayout();
 	}
 
 	async applyLayout() {
@@ -120,10 +146,18 @@ export default class Graph {
 
 	private fixNodes(nodes:cytoscape.NodeCollection) {
 		nodes.each(ele => {
-			const node = this.getNodeModel(ele);
-			if(!node) return;
-			node.fixed = true;
+			this.fixNode(ele);
 		});
+	}
+
+	private fixNode(ele:cytoscape.NodeSingular) {
+		const node = this.getNodeModel(ele);
+		if(!node) return;
+		const {x,y} = ele.position(); // make a copy of the values, because the cytoscape position will update after setting the first coordinate
+		node.x = x;
+		node.y = y;
+		node.fixed = true;
+		return node;
 	}
 
 	private addNode(node:NodeModel) {
@@ -162,5 +196,15 @@ export default class Graph {
 		const source = ele.source();
 		const target = ele.target();
 		return this.isFixedNode(source) && this.isFixedNode(target);
+	}
+
+	private getNodeElement(node:NodeModel):cytoscape.NodeSingular|undefined {
+		const ele = this.cy.getElementById(node.gid.toString());
+		return ele.isNode() ? ele : undefined;
+	}
+
+	private getEdgeElement(relation:NodeModel):cytoscape.EdgeSingular|undefined {
+		const ele = this.cy.getElementById(relation.gid.toString());
+		return ele.isEdge() ? ele : undefined;
 	}
 }
