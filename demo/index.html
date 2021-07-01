@@ -45,9 +45,6 @@
 								<li><a class="dropdown-item" href="#" onclick="setLayout('fcose')">FCose</a></li>
 							</ul>
 						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#" onclick="addNodes()">Add nodes</a>
-						</li>
 					</ul>
 					<form class="d-flex" onsubmit="filter()">
 						<input id="search" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -80,10 +77,20 @@
 					menuItems: [{
 						id: 'remove',
 						content: 'Remove',
-						tooltipText: 'Remove',
 						show: true,
 						selector: 'node, edge',
-						onClickFunction: event => console.log(event)
+						onClickFunction: event => {
+							const target = event.target || event.cyTarget;
+							target.remove();
+						}
+					}, {
+						id: 'addNode',
+						content: 'Create Node',
+						show: true,
+						coreAsWell: true,
+						onClickFunction: event => {
+							graph.model.nodes.add({x: event.position.x, y: event.position.y });
+						}
 					}]
 				});
 
@@ -108,15 +115,6 @@
 			}
 			function updateLayoutSelector() {
 				document.querySelector('.layout-name').innerHTML = _.capitalize(graph.model.layout.name);
-			}
-			function addNodes() {
-				const node1 = graph.model.nodes.add({labels: ['Test']});
-				const node2 = graph.model.nodes.add({labels: ['Test']});
-				graph.model.relations.add({
-					labels: 'TEST',
-					source: {gid: node1.gid},
-					target: {gid: node2.gid}
-				})
 			}
 			function filter() {
 				event.preventDefault();

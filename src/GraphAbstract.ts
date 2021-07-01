@@ -65,7 +65,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			complete: this.onEdgeDrawn.bind(this)
 		});
 
-		this.initInteractions();
+		this.initEvents();
 
 		// Use options
 		if (options.style instanceof Promise) {
@@ -76,18 +76,31 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		this.applyGraphUIStyles();
 	}
 
-	initInteractions() {
+	initEvents() {
 		// When a node is dropped
 		this.cy.on('dragfree', event => {
 			this.fixNodeElement(event.target);
 		});
 		this.cy.on('select', event => {
 			const entity = this.getEntityModel(event.target);
+			if(!entity) return;
 			this.model.setSelected(entity, true);
 		});
 		this.cy.on('unselect', event => {
 			const entity = this.getEntityModel(event.target);
+			if(!entity) return;
 			this.model.setSelected(entity, false);
+		});
+		this.cy.on('remove', event => {
+			const entity = this.getEntityModel(event.target);
+			if(!entity) return;
+
+			if(this.model.isNode(entity)) {
+				this.model.getNodes().remove(entity);
+			}
+			if(this.model.isRelation(entity)) {
+				this.model.getRelations().remove(entity);
+			}
 		});
 	}
 
