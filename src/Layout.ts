@@ -17,9 +17,11 @@ export default class Layout {
 	}
 
 	apply(elements:cytoscape.Collection, options?:object) {
-		return elements.layout({
+		const cyLayout = elements.layout({
 			...this.createOptions(),
 			...options
 		});
+		cyLayout.run();
+		return cyLayout;
 	}
 }

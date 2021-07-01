@@ -11,6 +11,14 @@ import GraphModelAbstract from "./models/GraphModelAbstract";
 import Layout from "./Layout";
 import ConcentricLayout from "./layouts/ConcentricLayout";
 import FCoseLayout from "./layouts/FCoseLayout";
+import edgehandles from 'cytoscape-edgehandles';
+
+// @ts-ignore
+import contextMenus from 'cytoscape-context-menus';
+import 'cytoscape-context-menus/cytoscape-context-menus.css';
+
+cytoscape.use( edgehandles as any );
+cytoscape.use( contextMenus );
 
 export type GraphAbstractOptions = {
 	elementData?:(entity:EntityModel)=>object;
@@ -53,12 +61,19 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		this.options = options;
 
 		this.cy = cytoscape(options);
+		this.cy.edgehandles({
+			complete: this.onEdgeDrawn.bind(this)
+		});
+
 		this.initInteractions();
 
 		// Use options
 		if (options.style instanceof Promise) {
 			this.initializing = options.style;
 		}
+
+		this.applyGraphStyles();
+		this.applyGraphUIStyles();
 	}
 
 	initInteractions() {
@@ -117,14 +132,31 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		];
 	}
 
-	protected applyDefaultStyles() {
+	protected applyGraphStyles() {
 		const style = this.cy.style() as any; // TS: type seems to be missing
 		style.selector('node')
 			.style('border-width', 1)
 			.style('border-color', '#ccc');
 		style.selector(':selected')
 			.style('background-blacken', 0.5);
+		style.selector('node:parent')
+			.style('background-blacken', -0.5);
+		style.selector('edge')
+			.style('target-arrow-shape', 'triangle')
+			.style('curve-style', 'bezier')
+			.style('arrow-scale', 1.3);
+
 		return style;
+	}
+
+	protected applyGraphUIStyles() {
+		const style = this.cy.style() as any; // TS: type seems to be missing
+
+		// Edge handle
+		style.selector('node.eh-handle')
+			.style('width', 20)
+			.style('height', 20)
+			.style('background-color', '#4dff00');
 	}
 
 	deinitWatchers(model:G) {
@@ -277,14 +309,16 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			if(ele.isEdge()) return !this.isFixedEdgeElement(ele);
 			return false;
 		});
+		if(!elements.length) return;
+
 		log.log(`Applying layout to ${elements.nodes().length} nodes.`);
 
 		const SpecificLayout = this.layouts[this.model.layout.name] || Layout;
 		const layout = new SpecificLayout(this.model.layout);
 		const cyLayout = layout.apply(elements, {
+			animate: true,
 			fit: elements.nodes().length === this.cy.nodes().length, // don't fit when applying partial layout,
 		});
-		cyLayout.run();
 
 		await cyLayout.promiseOn('layoutstop');
 		this.fixNodeElements(elements.nodes());
@@ -354,7 +388,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 	}
 
 	isFixedNodeElement(ele:cytoscape.NodeSingular) {
-		return this.model.isFixed(this.getNodeModel(ele));
+		const node = this.getNodeModel(ele);
+		return !node || this.model.isFixed(node);
 	}
 
 	isFixedEdgeElement(ele:cytoscape.EdgeSingular) {
@@ -375,6 +410,22 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 	getId(entity:N|R):string {
 		return entity.gid.toString();
+	}
+
+	// Event handlers
+
+	onEdgeDrawn(source:cytoscape.NodeSingular, target:cytoscape.NodeSingular, created:cytoscape.Collection) {
+		// Remove created elements, wait for model instead
+		created.remove();
+
+		const sourceModel = source.scratch('node');
+		const targetModel = target.scratch('node');
+		if(!sourceModel || !targetModel) return;
+
+		return this.model.getRelations().add({
+			source: sourceModel,
+			target: targetModel
+		}, true);
 	}
 
 	// For override

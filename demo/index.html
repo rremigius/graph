@@ -72,17 +72,29 @@
 				graph = new MyGraph({
 					container: document.getElementById('graph'),
 					labelColours: {
-						// AAA: '#2ea8ff',
-						// BBB: '#21bf30',
-						// CCC: '#eda215',
-						// DDD: '#d60000'
+						AAA: '#2ea8ff',
+						BBB: '#21bf30'
 					}
 				});
+				graph.cy.contextMenus({
+					menuItems: [{
+						id: 'remove',
+						content: 'Remove',
+						tooltipText: 'Remove',
+						show: true,
+						selector: 'node, edge',
+						onClickFunction: event => console.log(event)
+					}]
+				});
+
 				await graph.initialized;
-				graph.setData(DATA);
+				graph.setData({
+					layout: {name: 'fcose' },
+					...DATA
+				});
 
 				updateLayoutSelector();
-				console.log(graph.model);
+				console.log("Model:", graph.model);
 			})();
 
 			/* Interaction */

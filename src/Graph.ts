@@ -26,17 +26,24 @@ export default class Graph extends GraphAbstract<GraphModel, NodeModel, Relation
 		factory.register(NodeModel);
 		factory.register(RelationModel);
 		this.factory = factory;
-
-		this.applyDefaultStyles();
 	}
 
-	protected applyDefaultStyles() {
-		const style = super.applyDefaultStyles();
+	protected applyGraphStyles() {
+		const style = super.applyGraphStyles();
 		style.selector('node')
-			.style('label', (ele:Singular) => ele.scratch('node').getCaption())
-			.style('background-color', (ele:Singular) => this.getEntityColour(this.getEntityModel(ele)))
+			.style('label', (ele:Singular) => {
+				const node = ele.scratch('node');
+				return node ? node.getCaption() : '';
+			})
+			.style('background-color', (ele:Singular) => {
+				const entity = this.getEntityModel(ele);
+				return this.getEntityColour(entity);
+			});
 		style.selector('edge')
-			.style('label', (ele:Singular) => ele.scratch('relation').getCaption());
+			.style('label', (ele:Singular) => {
+				const relation = ele.scratch('relation');
+				return relation ? relation.getCaption() : '';
+			});
 	}
 
 	createModel(data:MozelData<GraphModel>) {
@@ -47,10 +54,14 @@ export default class Graph extends GraphAbstract<GraphModel, NodeModel, Relation
 		return entity.data.$export();
 	}
 
-	getEntityColour(entity:EntityModel) {
-		let colour = this.options.generateDefaultLabelColours !== false
+	getEntityColour(entity?:EntityModel) {
+		let colour = '#777';
+
+		if(!entity) return colour;
+
+		colour = this.options.generateDefaultLabelColours !== false
 			? this.generateDefaultLabelColour(entity.labels.get(0))
-			: '#777';
+			: colour;
 
 		for(let label of entity.labels.toArray().reverse()) {
 			colour = get(this.options, ['labelColours', label], colour)
