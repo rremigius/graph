@@ -1,21 +1,18 @@
-import cytoscape from "cytoscape";
+import cytoscape, {Singular} from "cytoscape";
 import Mozel, {deep, immediate} from "mozel";
 import {alphanumeric} from "validation-kit";
 import {debounce, forEach, includes, isPlainObject} from "lodash";
 
 import log from "./Log";
-// @ts-ignore
-import fcose from "cytoscape-fcose";
 import {MozelData} from "mozel/dist/Mozel";
 import EntityModel from "./models/EntityModel";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
 import GraphModelAbstract from "./models/GraphModelAbstract";
 import Layout from "./Layout";
 import ConcentricLayout from "./layouts/ConcentricLayout";
+import FCoseLayout from "./layouts/FCoseLayout";
 
-cytoscape.use(fcose);
-
-export type GraphOptions = {
+export type GraphAbstractOptions = {
 	elementData?:(entity:EntityModel)=>object;
 };
 
@@ -24,13 +21,14 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		return cytoscape;
 	}
 	layouts:Record<string, typeof Layout> = {
-		concentric: ConcentricLayout
+		concentric: ConcentricLayout,
+		fcose: FCoseLayout
 	};
 
 	private debouncedLayout = debounce(this.applyLayout.bind(this));
 	private updatesNextTick:Record<alphanumeric, N|R> = {};
 	private readonly initializing:Promise<any> = undefined;
-	private readonly options:GraphOptions;
+	protected readonly options:GraphAbstractOptions;
 
 	/**
 	 * Returns whether the Graph has been setup and is ready to take data.
@@ -50,7 +48,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 	private watchers:PropertyWatcher[] = [];
 
-	protected constructor(options?:cytoscape.CytoscapeOptions & GraphOptions) {
+	protected constructor(options?:cytoscape.CytoscapeOptions & GraphAbstractOptions) {
 		options = options || {};
 		this.options = options;
 
@@ -117,6 +115,16 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 				this.applyLayout().catch(err => log.error(err));
 			}, {deep, debounce: 0})
 		];
+	}
+
+	protected applyDefaultStyles() {
+		const style = this.cy.style() as any; // TS: type seems to be missing
+		style.selector('node')
+			.style('border-width', 1)
+			.style('border-color', '#ccc');
+		style.selector(':selected')
+			.style('background-blacken', 0.5);
+		return style;
 	}
 
 	deinitWatchers(model:G) {
