@@ -18,8 +18,16 @@ export default class GraphModel extends GraphModelAbstract<NodeModel, RelationMo
 		node.fixed = fixed;
 	}
 
+	isSelected(node:NodeModel):boolean {
+		return node.selected === true;
+	}
+
+	setSelected(node:NodeModel, selected:boolean) {
+		node.selected = selected;
+	}
+
 	getPosition(node:NodeModel):{x:number, y:number} {
-		return {x: node.x || 0, y: node.y || 0};
+		return {x: node.x, y: node.y};
 	}
 
 	setPosition(node:NodeModel, x:number, y:number) {
@@ -57,5 +65,9 @@ export default class GraphModel extends GraphModelAbstract<NodeModel, RelationMo
 
 	getRelations(): Collection<RelationModel> {
 		return this.relations;
+	}
+
+	getGroup(node:NodeModel) {
+		return node.group;
 	}
 }

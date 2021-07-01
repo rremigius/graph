@@ -49,9 +49,8 @@
 							<a class="nav-link" href="#" onclick="addNodes()">Add nodes</a>
 						</li>
 					</ul>
-					<form class="d-flex">
-						<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-						<button class="btn btn-outline-success" type="submit">Search</button>
+					<form class="d-flex" onsubmit="filter()">
+						<input id="search" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
 					</form>
 				</div>
 			</div>
@@ -67,14 +66,30 @@
 				const Graph = window.Graph;
 				class MyGraph extends Graph {
 					getElementData(entity) {
-						const data = entity.data ? entity.data.$export() : {};
-						data.label = Graph.getLabel(entity);
-						return data;
+						return entity.data ? entity.data.$export() : {};
 					}
 				}
-				const style = Graph.cytoscape.stylesheet()
-					.selector('node').style('label', ele => ele.data('label'))
-					.selector('edge').style('label', ele => ele.data('label'));
+				const style = Graph.cytoscape.stylesheet();
+				const LABEL_COLOURS = {
+					AAA: '#2ea8ff',
+					BBB: '#21bf30',
+					CCC: '#eda215',
+					DDD: '#d60000'
+				};
+				function getNodeColour(node, isGroup = false) {
+					if(isGroup) return '#ccc';
+					let colour;
+					for(let label of node.labels.toArray()) {
+						if(label in LABEL_COLOURS) colour = LABEL_COLOURS[label];
+					}
+					return colour || '#333';
+				}
+
+				style.selector('node')
+					.style('label', ele => ele.scratch('node').getCaption())
+					// .style('background-color', ele => getNodeColour(ele.scratch('node'), ele.children().length > 0));
+				style.selector('edge')
+					.style('label', ele => ele.scratch('relation').getCaption());
 
 				graph = new MyGraph({
 					container: document.getElementById('graph'),
@@ -107,6 +122,19 @@
 					source: {gid: node1.gid},
 					target: {gid: node2.gid}
 				})
+			}
+			function filter() {
+				event.preventDefault();
+
+				const input = document.querySelector('#search');
+				const query = input.value;
+				if(query.length === 0) {
+					graph.cy.filter(()=>true).unselect();
+				} else {
+					const found = graph.cy.filter(query);
+					graph.cy.filter(()=>true).difference(found).unselect();
+					found.select();
+				}
 			}
 		</script>
 	</body>

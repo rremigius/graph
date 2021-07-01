@@ -13,6 +13,9 @@ export default abstract class GraphModelAbstract<N extends Mozel, R extends Moze
 
 	abstract isFixed(node:N):boolean;
 	abstract setFixed(node:N, fixed:boolean):void;
+	abstract isSelected(entity:N|R):boolean;
+	abstract setSelected(entity:N|R, selected:boolean):void;
+
 	abstract getPosition(node:N):{x:number, y:number};
 	abstract setPosition(node:N, x:number, y:number):void;
 	abstract getRelationSource(relation:R):N;
@@ -23,4 +26,5 @@ export default abstract class GraphModelAbstract<N extends Mozel, R extends Moze
 	abstract getGraphModelRelationsPath():string;
 	abstract getNodes():Collection<N>;
 	abstract getRelations():Collection<R>;
+	abstract getGroup(node:N):N|undefined;
 }

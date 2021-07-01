@@ -4,18 +4,8 @@ import RelationModel from "./models/RelationModel";
 import {MozelFactory} from "mozel";
 import GraphModel from "./models/GraphModel";
 import {MozelData} from "mozel/dist/Mozel";
-import EntityModel from "./models/EntityModel";
-import {isEmpty} from "lodash";
 
 export default class Graph extends GraphAbstract<GraphModel, NodeModel, RelationModel> {
-	static getLabel(entity:EntityModel) {
-		if(entity.data && !isEmpty(entity.data.name)) return entity.data.name;
-		if(entity.labels.length) {
-			return entity.labels.toArray().join(':');
-		}
-		return '';
-	}
-
 	factory:MozelFactory;
 
 	constructor(options?:GraphOptions) {

@@ -18,7 +18,8 @@ window.DATA = {
 			"labels": [
 				"CCC"
 			],
-			"data": {}
+			"data": {},
+			"group": {"gid": 45573}
 		},
 		{
 			"gid": 42441,
@@ -28,7 +29,8 @@ window.DATA = {
 			"labels": [
 				"DDD"
 			],
-			"data": {}
+			"data": {},
+			"group": {"gid": 45573}
 		},
 		{
 			"gid": 46929,
@@ -38,7 +40,8 @@ window.DATA = {
 			"labels": [
 				"AAA"
 			],
-			"data": {}
+			"data": {},
+			"group": {"gid": 45573}
 		},
 		{
 			"gid": 46715,
