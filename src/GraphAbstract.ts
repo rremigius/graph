@@ -1,5 +1,5 @@
 import cytoscape from "cytoscape";
-import Mozel, {Collection, deep, immediate} from "mozel";
+import Mozel, {deep, immediate} from "mozel";
 import {alphanumeric} from "validation-kit";
 import {debounce, forEach, includes, isPlainObject} from "lodash";
 
@@ -9,6 +9,7 @@ import fcose from "cytoscape-fcose";
 import {MozelData} from "mozel/dist/Mozel";
 import EntityModel from "./models/EntityModel";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
+import GraphModelAbstract from "./models/GraphModelAbstract";
 
 cytoscape.use(fcose);
 
@@ -16,7 +17,7 @@ export type GraphOptions = {
 	elementData?:(entity:EntityModel)=>object;
 };
 
-export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R extends Mozel> {
+export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N extends Mozel, R extends Mozel> {
 	static get cytoscape() {
 		return cytoscape;
 	}
@@ -34,7 +35,13 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 	}
 
 	public readonly cy:cytoscape.Core;
-	public model:G;
+	public _model:G;
+	public get model() {
+		return this._model;
+	}
+	public set model(model:G) {
+		this.setModel(model);
+	}
 
 	private watchers:PropertyWatcher[] = [];
 
@@ -59,8 +66,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 	}
 
 	initWatchers(model:G) {
-		const nodesPath = this.getGraphModelNodesPath();
-		const relationsPath = this.getGraphModelRelationsPath();
+		const nodesPath = this.model.getGraphModelNodesPath();
+		const relationsPath = this.model.getGraphModelRelationsPath();
 		// Watch nodes
 		this.watchers.push(
 			model.$watch(nodesPath + '.*', () => {
@@ -79,7 +86,7 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 		this.watchers.push(
 			model.$watch(nodesPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
-				if(!this.isNode(newValue) || !this.isNode(oldValue)) return;
+				if(!this.model.isNode(newValue) || !this.model.isNode(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
@@ -90,7 +97,7 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 		this.watchers.push(
 			this.model.$watch(relationsPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
-				if(!this.isRelation(newValue) || !this.isRelation(oldValue)) return;
+				if(!this.model.isRelation(newValue) || !this.model.isRelation(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
@@ -108,7 +115,7 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 		if(this.model) {
 			this.deinitWatchers(this.model);
 		}
-		this.model = model;
+		this._model = model;
 		this.initWatchers(model);
 	}
 
@@ -132,8 +139,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 			.remove();
 
 		// Create missing node elements for node models
-		this.getNodes().each(node => {
-			if(!this.isNode(node)) {
+		this.model.getNodes().each(node => {
+			if(!this.model.isNode(node)) {
 				log.error("Invalid node:", node);
 				return;
 			}
@@ -159,8 +166,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 
 			for(let gid in this.updatesNextTick) {
 				const entity = this.updatesNextTick[gid];
-				if(this.isNode(entity)) this.updateNodeElement(entity);
-				if(this.isRelation(entity)) this.updateEdgeElement(entity);
+				if(this.model.isNode(entity)) this.updateNodeElement(entity);
+				if(this.model.isRelation(entity)) this.updateEdgeElement(entity);
 			}
 			// Clear updates
 			this.updatesNextTick = {};
@@ -176,7 +183,7 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 		}
 
 		// Set position
-		const position = this.getPosition(node);
+		const position = this.model.getPosition(node);
 		ele.position({x: position.x || 0, y: position.y || 0});
 
 		// Set data
@@ -220,8 +227,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 			.remove();
 
 		// Create missing edge elements for relation models
-		this.getRelations().each(relation => {
-			if(!this.isRelation(relation)) {
+		this.model.getRelations().each(relation => {
+			if(!this.model.isRelation(relation)) {
 				log.error("Invalid relation:", relation);
 				return;
 			}
@@ -266,8 +273,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 
 		if(!node) return;
 		const {x, y} = ele.position();
-		this.setPosition(node, x, y);
-		this.setFixed(node, true);
+		this.model.setPosition(node, x, y);
+		this.model.setFixed(node, true);
 		return node;
 	}
 
@@ -289,8 +296,8 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 			group: 'edges',
 			data: {
 				id: this.getId(relation),
-				source: this.getId(this.getRelationSource(relation)),
-				target: this.getId(this.getRelationTarget(relation))
+				source: this.getId(this.model.getRelationSource(relation)),
+				target: this.getId(this.model.getRelationTarget(relation))
 			}
 		});
 		this.updateEdgeElement(relation);
@@ -298,15 +305,15 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 	}
 
 	getNodeModel(nodeElement:cytoscape.NodeSingular) {
-		return this.getNodes().find(node => this.isNode(node) && this.getId(node) === nodeElement.id()) as N;
+		return this.model.getNodes().find(node => this.model.isNode(node) && this.getId(node) === nodeElement.id()) as N;
 	}
 
 	getRelationModel(edge:cytoscape.EdgeSingular) {
-		return this.getRelations().find(relation => this.isRelation(relation) && this.getId(relation) === edge.id()) as R;
+		return this.model.getRelations().find(relation => this.model.isRelation(relation) && this.getId(relation) === edge.id()) as R;
 	}
 
 	isFixedNodeElement(ele:cytoscape.NodeSingular) {
-		return this.isFixed(this.getNodeModel(ele));
+		return this.model.isFixed(this.getNodeModel(ele));
 	}
 
 	isFixedEdgeElement(ele:cytoscape.EdgeSingular) {
@@ -333,16 +340,4 @@ export default abstract class GraphAbstract<G extends Mozel, N extends Mozel, R 
 
 	abstract createModel(data:MozelData<G>):G;
 	abstract getElementData(entity:N|R):object;
-	abstract isFixed(node:N):boolean;
-	abstract setFixed(node:N, fixed:boolean):void;
-	abstract getPosition(node:N):{x:number, y:number};
-	abstract setPosition(node:N, x:number, y:number):void;
-	abstract getRelationSource(relation:R):N;
-	abstract getRelationTarget(relation:R):N;
-	abstract isNode(entity:any):entity is N;
-	abstract isRelation(entity:any):entity is R;
-	abstract getGraphModelNodesPath():string;
-	abstract getGraphModelRelationsPath():string;
-	abstract getNodes():Collection<N>;
-	abstract getRelations():Collection<R>;
 }
