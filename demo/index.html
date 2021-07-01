@@ -3,22 +3,66 @@
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<meta content="utf-8" http-equiv="encoding">
 
+		<!-- Bootstrap -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+		<!-- Lodash -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 		<script src="../dist/graph.js"></script>
 		<style>
 			body {
 				padding: 0;
 				margin: 0;
+				display: flex;
+				flex-direction: column;
+				height: 100%;
 			}
 			#graph {
-				height: 100%;
+				flex: 1;
 			}
 		</style>
 	</head>
 	<body>
+		<!-- Menu -->
+		<nav id="menu" class="navbar navbar-expand-lg navbar-light bg-light">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="#">Graph</a>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								Layout: <span class="layout-name"></span>
+							</a>
+							<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+								<li><a class="dropdown-item" href="#" onclick="setLayout('random')">Random</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('circle')">Circle</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('grid')">Grid</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('concentric')">Concentric</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('breadthfirst')">Breadth-First</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('cose')">Cose</a></li>
+								<li><a class="dropdown-item" href="#" onclick="setLayout('fcose')">FCose</a></li>
+							</ul>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" onclick="addNodes()">Add nodes</a>
+						</li>
+					</ul>
+					<form class="d-flex">
+						<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+						<button class="btn btn-outline-success" type="submit">Search</button>
+					</form>
+				</div>
+			</div>
+		</nav>
+
+		<!-- Graph -->
 		<div id="graph"></div>
 
 		<script src="./data.js"></script>
 		<script type="text/javascript">
+			let graph;
 			(async function() {
 				const Graph = window.Graph;
 				class MyGraph extends Graph {
@@ -32,23 +76,38 @@
 					.selector('node').style('label', ele => ele.data('label'))
 					.selector('edge').style('label', ele => ele.data('label'));
 
-				const graph = new MyGraph({
+				graph = new MyGraph({
 					container: document.getElementById('graph'),
 					style: style
 				});
 				await graph.initialized;
 				graph.setData(DATA);
-				setTimeout(()=>{
-					const node1 = graph.model.nodes.add({labels: ['Test']});
-					const node2 = graph.model.nodes.add({labels: ['Test']});
-					const rel = graph.model.relations.add({
-						labels: 'TEST',
-						source: {gid: node1.gid},
-						target: {gid: node2.gid}
-					})
-				},3000);
+
+				updateLayoutSelector();
 				console.log(graph.model);
 			})();
+
+			/* Interaction */
+
+			function setLayout(layout) {
+				graph.model.layout.$setData({
+					name: layout,
+					options: {animate: true}
+				}, true);
+				updateLayoutSelector();
+			}
+			function updateLayoutSelector() {
+				document.querySelector('.layout-name').innerHTML = _.capitalize(graph.model.layout.name);
+			}
+			function addNodes() {
+				const node1 = graph.model.nodes.add({labels: ['Test']});
+				const node2 = graph.model.nodes.add({labels: ['Test']});
+				graph.model.relations.add({
+					labels: 'TEST',
+					source: {gid: node1.gid},
+					target: {gid: node2.gid}
+				})
+			}
 		</script>
 	</body>
 </html>

@@ -1,5 +1,5 @@
 import cytoscape from "cytoscape";
-import Mozel, {deep, immediate} from "mozel";
+import Mozel, {deep, immediate, schema} from "mozel";
 import {alphanumeric} from "validation-kit";
 import {debounce, forEach, includes, isPlainObject} from "lodash";
 
@@ -68,41 +68,42 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 	initWatchers(model:G) {
 		const nodesPath = this.model.getGraphModelNodesPath();
 		const relationsPath = this.model.getGraphModelRelationsPath();
-		// Watch nodes
-		this.watchers.push(
+
+		this.watchers = [
+			// Watch nodes
 			model.$watch(nodesPath + '.*', () => {
 				this.updateNodes();
-			}, {debounce: 0, immediate})
-		);
+			}, {debounce: 0, immediate}),
 
-		// Watch relations
-		this.watchers.push(
+			// Watch relations
 			model.$watch(relationsPath + '.*', () => {
 				this.updateRelations();
-			}, {debounce: 0, immediate})
-		);
+			}, {debounce: 0, immediate}),
 
-		// Watch node properties
-		this.watchers.push(
+			// Watch node properties
 			model.$watch(nodesPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
 				if(!this.model.isNode(newValue) || !this.model.isNode(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
-			}, {deep, immediate})
-		);
+			}, {deep, immediate}),
 
-		// Watch relation properties
-		this.watchers.push(
+			// Watch relation properties
 			this.model.$watch(relationsPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
 				if(!this.model.isRelation(newValue) || !this.model.isRelation(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
-			}, {deep, immediate})
-		);
+			}, {deep, immediate}),
+
+			// Watch layout
+			this.model.$watch('layout', change => {
+				this.model.unfixNodes(this.model.getNodes().toArray());
+				this.applyLayout().catch(err => log.error(err));
+			}, {deep, debounce: 0})
+		];
 	}
 
 	deinitWatchers(model:G) {
@@ -249,9 +250,11 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		});
 		log.log(`Applying layout to ${elements.nodes().length} nodes.`);
 
+		const layoutOptions = this.model.layout.options ? this.model.layout.options.$export() : {};
 		const options = {
-			name: 'fcose',
-			fit: elements.nodes().length === this.cy.nodes().length // don't fit when applying partial layout
+			name: this.model.layout.name,
+			...layoutOptions,
+			fit: elements.nodes().length === this.cy.nodes().length, // don't fit when applying partial layout,
 		} as any; // TS: otherwise BaseLayout does not accept enough options
 
 		const layout = elements.layout(options);

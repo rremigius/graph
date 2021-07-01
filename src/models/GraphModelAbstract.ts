@@ -1,8 +1,15 @@
-import Mozel, {Collection, property} from "mozel";
+import Mozel, {Collection, property, required} from "mozel";
+import LayoutModel from "./LayoutModel";
 
 export default abstract class GraphModelAbstract<N extends Mozel, R extends Mozel> extends Mozel {
-	@property(String)
-	layout:string;
+	@property(LayoutModel, {required})
+	layout:LayoutModel;
+
+	unfixNodes(nodes:N[]) {
+		for(let node of nodes) {
+			this.setFixed(node, false);
+		}
+	}
 
 	abstract isFixed(node:N):boolean;
 	abstract setFixed(node:N, fixed:boolean):void;
