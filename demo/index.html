@@ -20,18 +20,21 @@
 		<script src="./data.js"></script>
 		<script type="text/javascript">
 			(async function() {
-				const style = window.Graph.cytoscape.stylesheet()
+				const Graph = window.Graph;
+				class MyGraph extends Graph {
+					getElementData(entity) {
+						const data = entity.data ? entity.data.$export() : {};
+						data.label = Graph.getLabel(entity);
+						return data;
+					}
+				}
+				const style = Graph.cytoscape.stylesheet()
 					.selector('node').style('label', ele => ele.data('label'))
 					.selector('edge').style('label', ele => ele.data('label'));
 
-				const graph = new window.Graph({
+				const graph = new MyGraph({
 					container: document.getElementById('graph'),
-					style: style,
-					elementData: entity => {
-						const data = entity.data ? entity.data.$export() : {};
-						data.label = window.Graph.getLabel(entity);
-						return data;
-					}
+					style: style
 				});
 				await graph.initialized;
 				graph.setData(DATA);
