@@ -1,12 +1,11 @@
-import GraphAbstract, {GraphAbstractOptions} from "./GraphAbstract";
+import ModelGraphAbstract, {GraphAbstractOptions} from "./ModelGraphAbstract";
 import NodeModel from "./models/NodeModel";
 import RelationModel from "./models/RelationModel";
-import {MozelFactory} from "mozel";
+import {Collection, schema} from "mozel";
 import GraphModel from "./models/GraphModel";
-import {MozelData} from "mozel/dist/Mozel";
 import EntityModel from "./models/EntityModel";
 import {get} from "lodash";
-import {Singular} from "cytoscape";
+import cytoscape, {Singular} from "cytoscape";
 import md5 from "md5";
 
 export type GraphOptions = GraphAbstractOptions & {
@@ -14,18 +13,13 @@ export type GraphOptions = GraphAbstractOptions & {
 	generateDefaultLabelColours?:boolean
 }
 
-export default class Graph extends GraphAbstract<GraphModel, NodeModel, RelationModel> {
-	factory:MozelFactory;
+export default class Graph extends ModelGraphAbstract<GraphModel, NodeModel, RelationModel> {
+	static get GraphModel() { return GraphModel }
 
 	protected readonly options:GraphOptions;
 
-	constructor(options?:GraphOptions) {
-		super(options);
-		const factory = new MozelFactory();
-		factory.register(GraphModel);
-		factory.register(NodeModel);
-		factory.register(RelationModel);
-		this.factory = factory;
+	constructor(cytoscape:cytoscape.Core, options?:GraphOptions) {
+		super(cytoscape, NodeModel, RelationModel, options);
 	}
 
 	protected applyGraphStyles() {
@@ -44,10 +38,6 @@ export default class Graph extends GraphAbstract<GraphModel, NodeModel, Relation
 				const relation = ele.scratch('relation');
 				return relation ? relation.getCaption() : '';
 			});
-	}
-
-	createModel(data:MozelData<GraphModel>) {
-		return this.factory.create(GraphModel, data);
 	}
 
 	getElementData(entity:NodeModel|RelationModel):object {
@@ -74,5 +64,60 @@ export default class Graph extends GraphAbstract<GraphModel, NodeModel, Relation
 		if(!label) return '#777';
 		const hash = md5(label);
 		return '#' + hash.substring(0,6);
+	}
+
+	/* ModelGraphAbstract implementations */
+
+	isFixed(node:NodeModel):boolean {
+		return node.fixed === true;
+	}
+
+	setFixed(node:NodeModel, fixed:boolean) {
+		node.fixed = fixed;
+	}
+
+	isSelected(node:NodeModel):boolean {
+		return node.selected === true;
+	}
+
+	setSelected(node:NodeModel, selected:boolean) {
+		node.selected = selected;
+	}
+
+	getPosition(node:NodeModel):{x:number, y:number} {
+		return {x: node.x, y: node.y};
+	}
+
+	setPosition(node:NodeModel, x:number, y:number) {
+		node.x = x;
+		node.y = y;
+	}
+
+	getRelationSource(relation:RelationModel):NodeModel {
+		return relation.source;
+	}
+
+	getRelationTarget(relation:RelationModel):NodeModel {
+		return relation.target;
+	}
+
+	getGraphModelNodesPath():string {
+		return schema(GraphModel).nodes.$;
+	}
+
+	getGraphModelRelationsPath():string {
+		return schema(GraphModel).relations.$;
+	}
+
+	getNodes(): Collection<NodeModel> {
+		return this.model.nodes;
+	}
+
+	getRelations(): Collection<RelationModel> {
+		return this.model.relations;
+	}
+
+	getGroup(node:NodeModel) {
+		return node.group;
 	}
 }

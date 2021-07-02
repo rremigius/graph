@@ -58,7 +58,7 @@
 
 		<script src="./data.js"></script>
 		<script type="text/javascript">
-			let graph;
+			let graph, model;
 			(async function() {
 				const Graph = window.Graph;
 				class MyGraph extends Graph {
@@ -66,14 +66,16 @@
 						return entity.data ? entity.data.$export() : {};
 					}
 				}
-				graph = new MyGraph({
-					container: document.getElementById('graph'),
+				const cy = Graph.cytoscape({
+					container: document.getElementById('graph')
+				});
+				graph = new MyGraph(cy, {
 					labelColours: {
 						AAA: '#2ea8ff',
 						BBB: '#21bf30'
 					}
 				});
-				graph.cy.contextMenus({
+				cy.contextMenus({
 					menuItems: [{
 						id: 'remove',
 						content: 'Remove',
@@ -94,27 +96,21 @@
 					}]
 				});
 
-				await graph.initialized;
-				graph.setData({
-					layout: {name: 'fcose' },
-					...DATA
+				cy.ready(()=>{
+					const model = Graph.GraphModel.createFactory().createAndResolveReferences(Graph.GraphModel, DATA);
+					graph.setModel(model);
+					setTimeout(()=>setLayout('cose'));
 				});
 
-				updateLayoutSelector();
 				console.log("Model:", graph.model);
 			})();
 
 			/* Interaction */
 
 			function setLayout(layout) {
-				graph.model.layout.$setData({
-					name: layout,
-					options: {animate: true}
-				}, true);
-				updateLayoutSelector();
-			}
-			function updateLayoutSelector() {
-				document.querySelector('.layout-name').innerHTML = _.capitalize(graph.model.layout.name);
+				graph.unfixNodes();
+				graph.applyLayout(layout);
+				document.querySelector('.layout-name').innerHTML = _.capitalize(layout);
 			}
 			function filter() {
 				event.preventDefault();
@@ -122,10 +118,10 @@
 				const input = document.querySelector('#search');
 				const query = input.value;
 				if(query.length === 0) {
-					graph.cy.filter(()=>true).unselect();
+					cy.filter(()=>true).unselect();
 				} else {
-					const found = graph.cy.filter(query);
-					graph.cy.filter(()=>true).difference(found).unselect();
+					const found = cy.filter(query);
+					cy.filter(()=>true).difference(found).unselect();
 					found.select();
 				}
 			}

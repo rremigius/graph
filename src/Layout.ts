@@ -1,21 +1,21 @@
-import LayoutModel from "./models/LayoutModel";
 import cytoscape, {LayoutOptions} from "cytoscape";
 
 export default class Layout {
-	readonly model:LayoutModel;
+	readonly options:LayoutOptions;
 
-	constructor(model:LayoutModel) {
-		this.model = model;
+	constructor(options:LayoutOptions) {
+		this.options = options || {name: 'random'};
 	}
 
 	createOptions():LayoutOptions {
-		const options = this.model.options ? this.model.options.$export() : {};
-		return {
-			...options,
-			name: this.model.name
-		};
+		return this.options;
 	}
 
+	/**
+	 *
+	 * @param elements
+	 * @param options	Options for override
+	 */
 	apply(elements:cytoscape.Collection, options?:object) {
 		const cyLayout = elements.layout({
 			...this.createOptions(),

@@ -1,18 +1,14 @@
-import cytoscape, {Singular} from "cytoscape";
-import Mozel, {deep, immediate} from "mozel";
-import {alphanumeric} from "validation-kit";
-import {debounce, forEach, includes, isPlainObject} from "lodash";
+import cytoscape, {LayoutOptions} from "cytoscape";
+import Mozel, {Collection, deep, immediate} from "mozel";
+import {alphanumeric, Constructor} from "validation-kit";
+import {debounce, forEach, includes, isPlainObject, isString} from "lodash";
 
 import log from "./Log";
-import {MozelData} from "mozel/dist/Mozel";
-import EntityModel from "./models/EntityModel";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
-import GraphModelAbstract from "./models/GraphModelAbstract";
 import Layout from "./Layout";
 import ConcentricLayout from "./layouts/ConcentricLayout";
 import FCoseLayout from "./layouts/FCoseLayout";
 import edgehandles from 'cytoscape-edgehandles';
-
 // @ts-ignore
 import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
@@ -21,10 +17,10 @@ cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
 
 export type GraphAbstractOptions = {
-	elementData?:(entity:EntityModel)=>object;
+	useEdgeHandles?:boolean
 };
 
-export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N extends Mozel, R extends Mozel> {
+export default abstract class ModelGraphAbstract<G extends Mozel, N extends Mozel, R extends Mozel> {
 	static get cytoscape() {
 		return cytoscape;
 	}
@@ -37,13 +33,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 	private updatesNextTick:Record<alphanumeric, N|R> = {};
 	private readonly initializing:Promise<any> = undefined;
 	protected readonly options:GraphAbstractOptions;
-
-	/**
-	 * Returns whether the Graph has been setup and is ready to take data.
-	 */
-	public get initialized() {
-		return this.initializing;
-	}
+	private NodeModel:Constructor<N>;
+	private RelationModel:Constructor<R>;
 
 	public readonly cy:cytoscape.Core;
 	public _model:G;
@@ -56,21 +47,27 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 	private watchers:PropertyWatcher[] = [];
 
-	protected constructor(options?:cytoscape.CytoscapeOptions & GraphAbstractOptions) {
+	protected constructor(
+		cytoscape:cytoscape.Core,
+		NodeModel:Constructor<N>,
+		RelationModel:Constructor<R>,
+		options?:GraphAbstractOptions
+	) {
 		options = options || {};
 		this.options = options;
+		this.NodeModel = NodeModel;
+		this.RelationModel = RelationModel;
 
-		this.cy = cytoscape(options);
-		this.cy.edgehandles({
-			complete: this.onEdgeDrawn.bind(this)
-		});
+		this.cy = cytoscape;
+
+		if(this.options.useEdgeHandles !== false && this.cy.edgehandles) {
+			log.info("Initializing edge handles.");
+			this.cy.edgehandles({
+				complete: this.onEdgeDrawn.bind(this)
+			});
+		}
 
 		this.initEvents();
-
-		// Use options
-		if (options.style instanceof Promise) {
-			this.initializing = options.style;
-		}
 
 		this.applyGraphStyles();
 		this.applyGraphUIStyles();
@@ -84,29 +81,29 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		this.cy.on('select', event => {
 			const entity = this.getEntityModel(event.target);
 			if(!entity) return;
-			this.model.setSelected(entity, true);
+			this.setSelected(entity, true);
 		});
 		this.cy.on('unselect', event => {
 			const entity = this.getEntityModel(event.target);
 			if(!entity) return;
-			this.model.setSelected(entity, false);
+			this.setSelected(entity, false);
 		});
 		this.cy.on('remove', event => {
 			const entity = this.getEntityModel(event.target);
 			if(!entity) return;
 
-			if(this.model.isNode(entity)) {
-				this.model.getNodes().remove(entity);
+			if(this.isNode(entity)) {
+				this.getNodes().remove(entity);
 			}
-			if(this.model.isRelation(entity)) {
-				this.model.getRelations().remove(entity);
+			if(this.isRelation(entity)) {
+				this.getRelations().remove(entity);
 			}
 		});
 	}
 
 	initWatchers(model:G) {
-		const nodesPath = this.model.getGraphModelNodesPath();
-		const relationsPath = this.model.getGraphModelRelationsPath();
+		const nodesPath = this.getGraphModelNodesPath();
+		const relationsPath = this.getGraphModelRelationsPath();
 
 		this.watchers = [
 			// Watch nodes
@@ -122,7 +119,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			// Watch node properties
 			model.$watch(nodesPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
-				if(!this.model.isNode(newValue) || !this.model.isNode(oldValue)) return;
+				if(!this.isNode(newValue) || !this.isNode(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
@@ -131,17 +128,11 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			// Watch relation properties
 			this.model.$watch(relationsPath + '.*', ({newValue, oldValue}) => {
 				// These changes are for the shallow watcher to handle
-				if(!this.model.isRelation(newValue) || !this.model.isRelation(oldValue)) return;
+				if(!this.isRelation(newValue) || !this.isRelation(oldValue)) return;
 				if(newValue.gid !== oldValue.gid) return;
 
 				this.updateNextTick(newValue);
 			}, {deep, immediate}),
-
-			// Watch layout
-			this.model.$watch('layout', change => {
-				this.model.unfixNodes(this.model.getNodes().toArray());
-				this.applyLayout().catch(err => log.error(err));
-			}, {deep, debounce: 0})
 		];
 	}
 
@@ -186,17 +177,6 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		this.initWatchers(model);
 	}
 
-	setData(data:MozelData<G>) {
-		log.log("Setting data", data);
-		if(!this.model) {
-			log.log("Creating model", data);
-			const model = this.createModel(data);
-			this.setModel(model);
-			return;
-		}
-		this.model.$setData(data);
-	}
-
 	updateNodes() {
 		log.log("Updating nodes");
 
@@ -206,8 +186,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			.remove();
 
 		// Create missing node elements for node models
-		this.model.getNodes().each(node => {
-			if(!this.model.isNode(node)) {
+		this.getNodes().each(node => {
+			if(!this.isNode(node)) {
 				log.error("Invalid node:", node);
 				return;
 			}
@@ -217,8 +197,6 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 				this.addNodeElement(node);
 			}
 		});
-
-		this.debouncedLayout();
 	}
 
 	updateNextTick(entity:N|R) {
@@ -233,8 +211,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 			for(let gid in this.updatesNextTick) {
 				const entity = this.updatesNextTick[gid];
-				if(this.model.isNode(entity)) this.updateNodeElement(entity);
-				if(this.model.isRelation(entity)) this.updateEdgeElement(entity);
+				if(this.isNode(entity)) this.updateNodeElement(entity);
+				if(this.isRelation(entity)) this.updateEdgeElement(entity);
 			}
 			// Clear updates
 			this.updatesNextTick = {};
@@ -250,7 +228,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		}
 
 		// Set position
-		const position = this.model.getPosition(node);
+		const position = this.getPosition(node);
 		if(position.x !== undefined && position.y !== undefined) { // don't move the element if no position was specified
 			ele.position({x: position.x, y: position.y});
 		}
@@ -267,7 +245,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		ele.data('gid', node.gid);
 
 		// Set state
-		this.model.isSelected(node) ? ele.select() : ele.unselect();
+		this.isSelected(node) ? ele.select() : ele.unselect();
 	}
 
 	updateEdgeElement(relation:R) {
@@ -290,7 +268,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		ele.data('gid', relation.gid);
 
 		// Set state
-		this.model.isSelected(relation) ? ele.select() : ele.unselect();
+		this.isSelected(relation) ? ele.select() : ele.unselect();
 	}
 
 	updateRelations() {
@@ -302,8 +280,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			.remove();
 
 		// Create missing edge elements for relation models
-		this.model.getRelations().each(relation => {
-			if(!this.model.isRelation(relation)) {
+		this.getRelations().each(relation => {
+			if(!this.isRelation(relation)) {
 				log.error("Invalid relation:", relation);
 				return;
 			}
@@ -312,22 +290,34 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 				this.addEdgeElement(relation);
 			}
 		});
-
-		this.debouncedLayout();
 	}
 
-	async applyLayout() {
-		const elements = this.cy.filter(ele => {
-			if(ele.isNode()) return !this.isFixedNodeElement(ele);
-			if(ele.isEdge()) return !this.isFixedEdgeElement(ele);
-			return false;
+	async applyLayout(options:LayoutOptions|string, nodes:N[] = undefined, relations:R[] = undefined) {
+		if(!nodes) nodes = this.getNodes().filter(node => !this.isFixed(node));
+		if(!relations) relations = this.getRelations().filter(relation => {
+			return includes(nodes, this.getRelationSource(relation))
+				|| includes(nodes, this.getRelationTarget(relation));
 		});
-		if(!elements.length) return;
+
+		let elements = this.cy.collection();
+		for(let node of nodes) {
+			const ele = this.getNodeElement(node);
+			if(ele) elements = elements.union(ele);
+		}
+		for(let relation of relations) {
+			const ele = this.getEdgeElement(relation);
+			if(ele) elements = elements.union(ele);
+		}
 
 		log.log(`Applying layout to ${elements.nodes().length} nodes.`);
 
-		const SpecificLayout = this.layouts[this.model.layout.name] || Layout;
-		const layout = new SpecificLayout(this.model.layout);
+		let layout:Layout;
+		if(isString(options)) {
+			const SpecificLayout = this.layouts[options] || Layout;
+			layout = new SpecificLayout({name: options});
+		} else {
+			layout = new Layout(options);
+		}
 		const cyLayout = layout.apply(elements, {
 			animate: true,
 			fit: elements.nodes().length === this.cy.nodes().length, // don't fit when applying partial layout,
@@ -349,14 +339,14 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 		if(!node) return;
 		const {x, y} = ele.position();
-		this.model.setPosition(node, x, y);
-		this.model.setFixed(node, true);
+		this.setPosition(node, x, y);
+		this.setFixed(node, true);
 		return node;
 	}
 
 	addNodeElement(node:N) {
 		log.log(`Adding node element: ${node}`);
-		const group = this.model.getGroup(node);
+		const group = this.getGroup(node);
 
 		const data:Record<string,any> = {
 			id: this.getId(node)
@@ -378,8 +368,8 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 			group: 'edges',
 			data: {
 				id: this.getId(relation),
-				source: this.getId(this.model.getRelationSource(relation)),
-				target: this.getId(this.model.getRelationTarget(relation))
+				source: this.getId(this.getRelationSource(relation)),
+				target: this.getId(this.getRelationTarget(relation))
 			}
 		});
 		ele.scratch('relation', relation);
@@ -388,11 +378,11 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 	}
 
 	getNodeModel(nodeElement:cytoscape.NodeSingular) {
-		return this.model.getNodes().find(node => this.model.isNode(node) && this.getId(node) === nodeElement.id()) as N;
+		return this.getNodes().find(node => this.isNode(node) && this.getId(node) === nodeElement.id()) as N;
 	}
 
 	getRelationModel(edge:cytoscape.EdgeSingular) {
-		return this.model.getRelations().find(relation => this.model.isRelation(relation) && this.getId(relation) === edge.id()) as R;
+		return this.getRelations().find(relation => this.isRelation(relation) && this.getId(relation) === edge.id()) as R;
 	}
 
 	getEntityModel(ele:cytoscape.Singular) {
@@ -402,7 +392,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 	isFixedNodeElement(ele:cytoscape.NodeSingular) {
 		const node = this.getNodeModel(ele);
-		return !node || this.model.isFixed(node);
+		return !node || this.isFixed(node);
 	}
 
 	isFixedEdgeElement(ele:cytoscape.EdgeSingular) {
@@ -425,6 +415,19 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		return entity.gid.toString();
 	}
 
+	unfixNodes(nodes?:N[]) {
+		if(!nodes) nodes = this.getNodes().toArray();
+		for(let node of nodes) {
+			this.setFixed(node, false);
+		}
+	}
+	isNode(entity:any):entity is N {
+		return entity instanceof this.NodeModel;
+	}
+	isRelation(entity:any):entity is R {
+		return entity instanceof this.RelationModel;
+	}
+
 	// Event handlers
 
 	onEdgeDrawn(source:cytoscape.NodeSingular, target:cytoscape.NodeSingular, created:cytoscape.Collection) {
@@ -435,7 +438,7 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 		const targetModel = target.scratch('node');
 		if(!sourceModel || !targetModel) return;
 
-		return this.model.getRelations().add({
+		return this.getRelations().add({
 			source: sourceModel,
 			target: targetModel
 		}, true);
@@ -443,6 +446,20 @@ export default abstract class GraphAbstract<G extends GraphModelAbstract<N,R>, N
 
 	// For override
 
-	abstract createModel(data:MozelData<G>):G;
 	abstract getElementData(entity:N|R):object;
+
+	abstract isFixed(node:N):boolean;
+	abstract setFixed(node:N, fixed:boolean):void;
+	abstract isSelected(entity:N|R):boolean;
+	abstract setSelected(entity:N|R, selected:boolean):void;
+
+	abstract getPosition(node:N):{x:number, y:number};
+	abstract setPosition(node:N, x:number, y:number):void;
+	abstract getRelationSource(relation:R):N;
+	abstract getRelationTarget(relation:R):N;
+	abstract getGraphModelNodesPath():string;
+	abstract getGraphModelRelationsPath():string;
+	abstract getNodes():Collection<N>;
+	abstract getRelations():Collection<R>;
+	abstract getGroup(node:N):N|undefined;
 }
