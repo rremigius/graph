@@ -29,7 +29,6 @@ export default abstract class ModelGraphAbstract<G extends Mozel, N extends Moze
 		fcose: FCoseLayout
 	};
 
-	private debouncedLayout = debounce(this.applyLayout.bind(this));
 	private updatesNextTick:Record<alphanumeric, N|R> = {};
 	private readonly initializing:Promise<any> = undefined;
 	protected readonly options:GraphAbstractOptions;
@@ -63,7 +62,7 @@ export default abstract class ModelGraphAbstract<G extends Mozel, N extends Moze
 		if(this.options.useEdgeHandles !== false && this.cy.edgehandles) {
 			log.info("Initializing edge handles.");
 			this.cy.edgehandles({
-				complete: this.onEdgeDrawn.bind(this)
+				complete: this.onEdgeDragged.bind(this)
 			});
 		}
 
@@ -430,7 +429,7 @@ export default abstract class ModelGraphAbstract<G extends Mozel, N extends Moze
 
 	// Event handlers
 
-	onEdgeDrawn(source:cytoscape.NodeSingular, target:cytoscape.NodeSingular, created:cytoscape.Collection) {
+	onEdgeDragged(source:cytoscape.NodeSingular, target:cytoscape.NodeSingular, created:cytoscape.Collection) {
 		// Remove created elements, wait for model instead
 		created.remove();
 
