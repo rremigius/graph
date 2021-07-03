@@ -2,8 +2,8 @@ import Mozel, {Collection, collection, GenericMozel, property, required} from "m
 import {isEmpty} from "lodash";
 
 export default class EntityModel extends Mozel {
-	@collection(String)
-	labels!:Collection<string>;
+	@property(String)
+	label?:string;
 
 	@property(GenericMozel, {required, default:()=>new GenericMozel()})
 	data!:GenericMozel;
@@ -11,15 +11,8 @@ export default class EntityModel extends Mozel {
 	@property(Boolean)
 	selected?:boolean;
 
-	getCaption() {
-		if(this.data && !isEmpty(this.data.name)) return this.data.name;
-		if(this.labels.length) {
-			return this.labels.toArray().join(':');
-		}
-		return '';
-	}
-
 	toString() {
-		return `Entity ${this.gid}`;
+		const label = this.label ? ':' + this.label : '';
+		return `Entity${label} (${this.gid})`;
 	}
 }

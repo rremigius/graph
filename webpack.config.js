@@ -1,7 +1,10 @@
 const path = require('path');
 
+const demo = process.env.DEMO || 'default';
+console.log(`Building ${demo}...`);
+
 module.exports = {
-	entry: './src/index.ts',
+	entry: `./demos/${demo}/index.ts`,
 	mode: "development",
 	devtool: "eval-source-map",
 	module: {
@@ -22,6 +25,6 @@ module.exports = {
 	},
 	output: {
 		filename: 'graph.js',
-		path: path.resolve(__dirname, 'dist'),
+		path: path.resolve(__dirname, `./demos/${demo}`),
 	},
 };

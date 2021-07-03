@@ -2,6 +2,9 @@ import {property, reference} from "mozel";
 import EntityModel from "./EntityModel";
 
 export default class NodeModel extends EntityModel {
+	static get type() {
+		return 'node';
+	}
 	@property(Number)
 	x?:number;
 
@@ -15,7 +18,7 @@ export default class NodeModel extends EntityModel {
 	group?:NodeModel;
 
 	toString() {
-		const labels = this.labels ? ':' + this.labels.toArray().join(':') : '';
-		return `Node${labels} (${this.gid})`;
+		const label = this.label ? ':' + this.label : '';
+		return `Node${label} (${this.gid})`;
 	}
 }
