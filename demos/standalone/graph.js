@@ -8,7 +8,9 @@ cytoscape.use(window.cytoscapeEdgehandles);
 
 const LAYOUTS = {
 	cose: {
-		name: 'cose'
+		name: 'cose',
+		idealEdgeLength: () => 70,
+		nodeDimensionsIncludeLabels: true
 	}
 };
 
