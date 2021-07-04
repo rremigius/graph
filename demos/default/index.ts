@@ -8,9 +8,9 @@ import fcose from "cytoscape-fcose";
 
 import GraphModel from "../../src/models/GraphModel";
 import DATA from "./data";
-import NodeModelMapping from "../../src/NodeModelMapping";
-import EdgeModelMapping from "../../src/EdgeModelMapping";
 import style from "./style";
+import NodeModelMapping from "../../src/mappings/NodeModelMapping";
+import EdgeModelMapping from "../../src/mappings/EdgeModelMapping";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );

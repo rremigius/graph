@@ -1,12 +1,13 @@
 import Mozel, {Collection, deep, immediate} from "mozel";
-import {Core, EventObject, SingularData} from "cytoscape";
+import {Core, EdgeSingular, EventObject, NodeSingular, SingularData} from "cytoscape";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
-import {alphanumeric, Constructor} from "validation-kit";
+import {alphanumeric, check, Constructor, instanceOf} from "validation-kit";
 import log from "./Log";
 import {forEach, includes, isPlainObject, uniqueId} from "lodash";
 import data from "../demos/default/data";
+import {CollectionItemAddedEvent, CollectionItemRemovedEvent} from "mozel/dist/Collection";
 
-export default abstract class ModelMappingAbstract<M extends Mozel, E extends SingularData> {
+export default abstract class ModelMappingAbstract<M extends Mozel, E extends NodeSingular|EdgeSingular> {
 	public static readonly CYTOSCAPE_NAMESPACE = 'modelGraph';
 	protected readonly cy:Core;
 	protected readonly model:Mozel;
@@ -56,6 +57,22 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends Si
 	protected initModelToCytoScape() {
 		const path = this.path;
 
+		// Create first set of elements
+		this.models.each(model => this.createElement(model));
+
+		// Watch models
+		this.models.on(CollectionItemAddedEvent, event => {
+			const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+			log.log(`Model added: ${model}`)
+			this.createElement(model);
+		});
+		this.models.on(CollectionItemRemovedEvent, event => {
+			const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+			log.log(`Model removed: ${model}`)
+			const ele = this.getElement(model);
+			if(ele) this.cy.remove(ele);
+		})
+
 		this.watchers = [
 			// Check that collection stays
 			this.model.$watch(path, ({newValue}) => {
@@ -64,11 +81,6 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends Si
 					this.stop();
 				}
 			}, {immediate}),
-
-			// Watch models
-			this.model.$watch(path + '.*', () => {
-				this.updateElements();
-			}, {debounce: 0, immediate}),
 
 			// Watch properties
 			this.model.$watch(path + '.*', ({newValue, oldValue}) => {
@@ -143,6 +155,13 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends Si
 			throw new Error("Created element does not match the mapping type.");
 		}
 		return ele;
+	}
+	removeElement(model:M):boolean {
+		const ele = this.getElement(model);
+		if(!ele) return false;
+		log.log(`Removing: ${model}`);
+		this.cy.remove(ele);
+		return true;
 	}
 
 	updateElement(model:M) {

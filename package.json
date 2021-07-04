@@ -12,7 +12,7 @@
     "lodash": "^4.17.21",
     "log-control": "0.0.2",
     "md5": "^2.3.0",
-    "mozel": "git+https://github.com/rremigius/mozel.git",
+    "mozel": "github:rremigius/mozel",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.4",
     "validation-kit": "0.0.7"
