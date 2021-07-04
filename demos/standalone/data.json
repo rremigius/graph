@@ -2,386 +2,287 @@
 	"nodes": [
 		{
 			"id": 45573,
-			"labels": [
-				"BBB"
-			],
-			"data": {"name": "BBB1"}
+			"label": "Document",
+			"name": "Bird population report"
 		},
 		{
 			"id": 49841,
-			"labels": [
-				"CCC"
-			],
-			"data": {},
+			"label": "Article",
 			"parent": 45573
 		},
 		{
 			"id": 42441,
-			"labels": [
-				"DDD"
-			],
-			"data": {},
+			"label": "Book",
 			"parent": 45573
 		},
 		{
 			"id": 46929,
-			"labels": [
-				"AAA"
-			],
-			"data": {},
+			"label": "Website",
 			"parent": 45573
 		},
 		{
 			"id": 46715,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 46926,
-			"labels": [
-				"AAA"
-			],
-			"data": {"name": "AAA1"}
+			"label": "Website",
+			"name": "News website"
 		},
 		{
 			"id": 49711,
-			"labels": [
-				"CCC"
-			],
-			"data": {}
+			"label": "Article"
 		},
 		{
 			"id": 49048,
-			"labels": [
-				"CCC"
-			],
-			"data": {}
+			"label": "Article"
 		},
 		{
 			"id": 44599,
-			"labels": [
-				"DDD"
-			],
-			"data": {}
+			"label": "Book"
 		},
 		{
 			"id": 42919,
-			"labels": [
-				"DDD"
-			],
-			"data": {}
+			"label": "Book"
 		},
 		{
 			"id": 49086,
-			"labels": [
-				"CCC"
-			],
-			"data": {}
+			"label": "Article"
 		},
 		{
 			"id": 46927,
-			"labels": [
-				"AAA"
-			],
-			"data": {"name": "AAA2"}
+			"label": "Website",
+			"name": "Website2"
 		},
 		{
 			"id": 46928,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 44633,
-			"labels": [
-				"DDD"
-			],
-			"data": {}
+			"label": "Book"
 		},
 		{
 			"id": 49609,
-			"labels": [
-				"CCC"
-			],
-			"data": {}
+			"label": "Article"
 		},
 		{
 			"id": 44369,
-			"labels": [
-				"DDD"
-			],
-			"data": {}
+			"label": "Book"
 		},
 		{
 			"id": 46874,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 47137,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 47136,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 45970,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 45746,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 46567,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 46434,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		},
 		{
 			"id": 46566,
-			"labels": [
-				"AAA"
-			],
-			"data": {}
+			"label": "Website"
 		}
 	],
-	"relations": [
+	"edges": [
 		{
 			"id": 58559,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 45573,
-			"target": 49841,
-			"data": {}
+			"target": 49841
 		},
 		{
 			"id": 56980,
-			"type": "YYY",
+			"label": "PARENT",
 			"source": 42441,
-			"target": 45573,
-			"data": {}
+			"target": 45573
 		},
 		{
 			"id": 53758,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42441,
-			"target": 46929,
-			"data": {}
+			"target": 46929
 		},
 		{
 			"id": 51794,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42441,
-			"target": 46715,
-			"data": {"name": "XXX1"}
+			"target": 46715
 		},
 		{
 			"id": 61434,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46929,
-			"target": 49841,
-			"data": {}
+			"target": 49841
 		},
 		{
 			"id": 53070,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46929,
-			"data": {}
+			"target": 46929
 		},
 		{
 			"id": 53069,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46929,
-			"data": {}
+			"target": 46929
 		},
 		{
 			"id": 57929,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46715,
-			"target": 49711,
-			"data": {}
+			"target": 49711
 		},
 		{
 			"id": 57930,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46715,
-			"target": 49048,
-			"data": {}
+			"target": 49048
 		},
 		{
 			"id": 51792,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44599,
-			"target": 46715,
-			"data": {}
+			"target": 46715
 		},
 		{
 			"id": 51793,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 46715,
-			"data": {}
+			"target": 46715
 		},
 		{
 			"id": 61429,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46926,
-			"target": 49086,
-			"data": {"name": "ZZZ1"}
+			"target": 49086
 		},
 		{
 			"id": 53065,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46927,
-			"data": {}
+			"target": 46927
 		},
 		{
 			"id": 53067,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46928,
-			"data": {}
+			"target": 46928
 		},
 		{
 			"id": 53064,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44633,
-			"target": 46926,
-			"data": {}
+			"target": 46926
 		},
 		{
 			"id": 53063,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44633,
-			"target": 46926,
-			"data": {}
+			"target": 46926
 		},
 		{
 			"id": 53068,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46928,
-			"data": {}
+			"target": 46928
 		},
 		{
 			"id": 53066,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 46926,
-			"target": 46927,
-			"data": {}
+			"target": 46927
 		},
 		{
 			"id": 61431,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46927,
-			"target": 49609,
-			"data": {}
+			"target": 49609
 		},
 		{
 			"id": 61432,
-			"type": "ZZZ",
+			"label": "CAUSES",
 			"source": 46928,
-			"target": 49609,
-			"data": {}
+			"target": 49609
 		},
 		{
 			"id": 55425,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44369,
-			"target": 46928,
-			"data": {}
+			"target": 46928
 		},
 		{
 			"id": 55634,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44599,
-			"target": 46874,
-			"data": {}
+			"target": 46874
 		},
 		{
 			"id": 54140,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44599,
-			"target": 47137,
-			"data": {}
+			"target": 47137
 		},
 		{
 			"id": 54134,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 44599,
-			"target": 47136,
-			"data": {}
+			"target": 47136
 		},
 		{
 			"id": 49042,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 45970,
-			"data": {}
+			"target": 45970
 		},
 		{
 			"id": 52452,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 45746,
-			"data": {}
+			"target": 45746
 		},
 		{
 			"id": 51757,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 46567,
-			"data": {}
+			"target": 46567
 		},
 		{
 			"id": 49680,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 46434,
-			"data": {}
+			"target": 46434
 		},
 		{
 			"id": 51009,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 46566,
-			"data": {}
+			"target": 46566
 		},
 		{
 			"id": 49043,
-			"type": "XXX",
+			"label": "PROPERTY",
 			"source": 42919,
-			"target": 45970,
-			"data": {}
+			"target": 45970
 		}
 	]
 }

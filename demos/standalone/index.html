@@ -79,24 +79,24 @@
 <!-- Form -->
 
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" onclick="graph.showForm()">
+<button type="button" class="btn btn-primary" onclick="graph.showNodeForm()">
 	Show Form
 </button>
 
 <!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
+<div class="modal fade" id="modal-form" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+	<div id="form" class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="formModalLabel">Modal title</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div id="modal-body" class="modal-body">
-				<vue-form-generator :schema="schema" :model="model" :options="formOptions"></vue-form-generator>
+				<vue-form-generator ref="form" :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
+				<button type="button" class="btn btn-primary" @click="onSubmit">Save changes</button>
 			</div>
 		</div>
 	</div>

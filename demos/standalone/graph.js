@@ -1,12 +1,10 @@
 import cytoscape from "./modules/cytoscape.esm.min.js";
+import {showForm} from "./form.js";
+import formSchemaNode from "./form-schema-node.js";
+import formSchemaEdge from "./form-schema-edge.js";
 
 cytoscape.use(window.cytoscapeContextMenus);
 cytoscape.use(window.cytoscapeEdgehandles);
-
-const Vue = window.Vue;
-const VueFormGenerator = window.VueFormGenerator;
-
-Vue.use(VueFormGenerator);
 
 const LAYOUTS = {
 	cose: {
@@ -24,9 +22,14 @@ const cy = cytoscape({
 			'background-color': ele => getNodeColour(ele)
 		}
 	}, {
-		selector: 'node[label]',
+		selector: '[label]',
 		style: {
 			'label': 'data(label)',
+		}
+	}, {
+		selector: '[title]',
+		style: {
+			'label': 'data(title)'
 		}
 	}, {
 		selector: 'edge',
@@ -34,11 +37,6 @@ const cy = cytoscape({
 			'target-arrow-shape': 'triangle',
 			'curve-style': 'bezier',
 			'arrow-scale': 1.3
-		}
-	}, {
-		selector: 'edge[type]',
-		style: {
-			'label': 'data(type)'
 		}
 	}, {
 		selector: 'node:parent',
@@ -62,13 +60,21 @@ const cy = cytoscape({
 
 cy.contextMenus({
 	menuItems: [{
+		id: 'edit',
+		content: 'Edit',
+		show: true,
+		selector: '.entity',
+		onClickFunction: event => {
+			if(event.target.isNode()) showNodeForm(event.target);
+			if(event.target.isEdge()) showEdgeForm(event.target);
+		}
+	},{
 		id: 'remove',
 		content: 'Remove',
 		show: true,
-		selector: 'node, edge',
+		selector: '.entity',
 		onClickFunction: event => {
-			const target = event.target || event.cyTarget;
-			target.remove();
+			event.target.remove();
 		}
 	}, {
 		id: 'addNode',
@@ -76,23 +82,16 @@ cy.contextMenus({
 		show: true,
 		coreAsWell: true,
 		onClickFunction: event => {
-			createNode({
-				id: _.uniqueId('node-'),
-				labels: ['New'],
-				x: event.position.x,
-				y: event.position.y
-			});
+			showNodeForm({x: event.position.x, y: event.position.y});
 		}
 	}]
 });
 
 cy.edgehandles({
 	complete: (source, target, created) => {
-		// Edge is created automatically, we just want to update it now
-		updateEdge({
-			id: created.data('id'),
-			type: 'NEW'
-		});
+		// Remove edge. After form it will be created definitively.
+		created.remove();
+		showEdgeForm({source: source.id(), target: target.id()});
 	}
 });
 
@@ -102,8 +101,8 @@ fetch('data.json').then(async response => {
 	for(let node of data.nodes) {
 		createNode(node);
 	}
-	for(let relation of data.relations) {
-		createEdge(relation);
+	for(let edge of data.edges) {
+		createEdge(edge);
 	}
 	applyLayout('cose');
 }).catch(e => console.error(e));
@@ -111,7 +110,8 @@ fetch('data.json').then(async response => {
 function createNode(node) {
 	return cy.add({
 		group: 'nodes',
-		data: getNodeData(node),
+		data: {...node},
+		classes: ['entity'],
 		position: {
 			x: node.x || 0,
 			y: node.y || 0
@@ -122,27 +122,9 @@ function createNode(node) {
 function createEdge(edge) {
 	return cy.add({
 		group: 'edges',
-		data: getEdgeData(edge)
+		data: edge,
+		classes: ['entity']
 	});
-}
-
-function getNodeData(nodeInfo) {
-	return {
-		...nodeInfo.data,
-		id: nodeInfo.id,
-		parent: nodeInfo.parent,
-		label: nodeInfo.labels[0]
-	};
-}
-
-function getEdgeData(edgeInfo) {
-	return {
-		...edgeInfo.data,
-		type: edgeInfo.type,
-		id: edgeInfo.id,
-		source: edgeInfo.source,
-		target: edgeInfo.target
-	};
 }
 
 function getNodeColour(node) {
@@ -152,18 +134,21 @@ function getNodeColour(node) {
 }
 
 function updateNode(data) {
+	const {x,y} = data;
+	data = _.omit(data, ['x','y']);
+
 	const ele = cy.$id(data.id);
 	if(!ele.isNode()) console.error(`Node ${data.id} not found. Cannot update.`);
-	ele.data(getNodeData(data));
-	if(data.x !== undefined && data.y !== undefined) {
-		ele.position({x: data.x, y: data.y})
+	ele.data(data);
+	if(x !== undefined && y !== undefined) {
+		ele.position({x,y});
 	}
 }
 
 function updateEdge(data) {
 	const ele = cy.$id(data.id);
 	if(!ele.isEdge()) console.error(`Edge ${data.id} not found. Cannot update.`);
-	ele.data(getEdgeData(data));
+	ele.data(data);
 }
 
 function applyLayout(name, elements = undefined) {
@@ -201,127 +186,51 @@ function filter() {
 }
 
 // UI
-function showForm() {
-	$('#modal').modal('show');
+function showNodeForm(node = {}) {
+	if(_.isFunction(node.isNode) && node.isNode()) {
+		node = exportNode(node);
+	}
+	if(!_.isPlainObject(node)) throw new Error("Presets argument must be node or plain object.");
 
-	const vm = new Vue({
-		el: "#modal-body",
-
-		components: {
-			"vue-form-generator": VueFormGenerator.component
-		},
-
-		data() {
-			return {
-				model: {
-					id: 1,
-					name: "John Doe",
-					password: "J0hnD03!x4",
-					age: 35,
-					skills: ["Javascript", "VueJS"],
-					email: "john.doe@gmail.com",
-					status: true
-				},
-				schema: {
-					fields: [{
-						type: "input",
-						inputType: "text",
-						label: "ID",
-						model: "id",
-						readonly: true,
-						featured: false,
-						disabled: true
-					}, {
-						type: "input",
-						inputType: "text",
-						label: "Name",
-						model: "name",
-						readonly: false,
-						featured: true,
-						required: true,
-						disabled: false,
-						placeholder: "User's name",
-						validator: VueFormGenerator.validators.string
-					}, {
-						type: "input",
-						inputType: "password",
-						label: "Password",
-						model: "password",
-						min: 6,
-						required: true,
-						hint: "Minimum 6 characters",
-						validator: VueFormGenerator.validators.string
-					}, {
-						type: "input",
-						inputType: "number",
-						label: "Age",
-						model: "age",
-						min: 18,
-						validator: VueFormGenerator.validators.number
-					}, {
-						type: "input",
-						inputType: "email",
-						label: "E-mail",
-						model: "email",
-						placeholder: "User's e-mail address",
-						validator: VueFormGenerator.validators.email
-					}, {
-						type: "checklist",
-						label: "Skills",
-						model: "skills",
-						multi: true,
-						required: true,
-						multiSelect: true,
-						values: ["HTML5", "Javascript", "CSS3", "CoffeeScript", "AngularJS", "ReactJS", "VueJS"]
-					}, {
-						type: "switch",
-						label: "Status",
-						model: "status",
-						multi: true,
-						readonly: false,
-						featured: false,
-						disabled: false,
-						default: true,
-						textOn: "Active",
-						textOff: "Inactive"
-					}]
-				},
-
-				formOptions: {
-					validateAfterLoad: true,
-					validateAfterChanged: true
-				}
-			};
-		},
-
-		methods: {
-			prettyJSON: function(json) {
-				if (json) {
-					json = JSON.stringify(json, undefined, 4);
-					json = json.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
-					return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
-						var cls = 'number';
-						if (/^"/.test(match)) {
-							if (/:$/.test(match)) {
-								cls = 'key';
-							} else {
-								cls = 'string';
-							}
-						} else if (/true|false/.test(match)) {
-							cls = 'boolean';
-						} else if (/null/.test(match)) {
-							cls = 'null';
-						}
-						return '<span class="' + cls + '">' + match + '</span>';
-					});
-				}
-			}
-		},
+	$('#modal-form').modal('show');
+	showForm(node, formSchemaNode, () => {
+		node.id ? updateNode(node) : createNode(node);
+		$('#modal-form').modal('hide');
 	});
+}
+
+function showEdgeForm(presets = {}) {
+	if(_.isFunction(presets.isEdge) && presets.isEdge()) {
+		presets = exportEdge(presets);
+	}
+	if(!_.isPlainObject(presets)) throw new Error("Presets argument must be edge or plain object.");
+
+	$('#modal-form').modal('show');
+	showForm(presets, formSchemaEdge, data => {
+		const edge = {
+			...presets,
+			label: data.label,
+			data: data
+		}
+		edge.id ? updateEdge(edge) : createEdge(edge);
+		$('#modal-form').modal('hide');
+	});
+}
+
+function exportNode(node) {
+	return {
+		...node.data(),
+		x: node.position('x'),
+		y: node.position('y')
+	}
+}
+
+function exportEdge(edge) {
+	return edge.data();
 }
 
 window.graph = {
 	applyLayout,
 	filter,
-	showForm
+	showNodeForm
 };
