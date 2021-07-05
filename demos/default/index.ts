@@ -11,18 +11,32 @@ import DATA from "./data";
 import style from "./style";
 import NodeModelMapping from "../../src/mappings/NodeModelMapping";
 import EdgeModelMapping from "../../src/mappings/EdgeModelMapping";
+import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
+import NodeModel from "../../src/models/NodeModel";
+import {MozelFactory, property, reference} from "mozel";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
 cytoscape.use( fcose );
 
-const model = GraphModel.createFactory().createAndResolveReferences(GraphModel, DATA);
+class Node extends NodeModel {
+	static get type() {
+		return 'node';
+	}
+	@property(Node, {reference})
+	link?:Node;
+}
+const factory = new MozelFactory();
+factory.register(Node);
+
+const model = factory.create(GraphModel, DATA);
 const cy = cytoscape({
 	container: document.getElementById('graph'),
 	style: style
 });
 const nodeMapping = new NodeModelMapping(cy, model, model.nodes);
 const edgeMapping = new EdgeModelMapping(cy, model, model.edges);
+const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
 
 (cy as any).contextMenus({
 	menuItems: [{
@@ -62,6 +76,7 @@ const edgeMapping = new EdgeModelMapping(cy, model, model.edges);
 cy.ready(()=>{
 	nodeMapping.start();
 	edgeMapping.start();
+	linkMapping.start();
 
 	setTimeout(() => {
 		cy.layout({

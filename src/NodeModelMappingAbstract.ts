@@ -14,8 +14,8 @@ export default abstract class NodeModelMappingAbstract<N extends Mozel> extends 
 	get elementGroup(): "edges" | "nodes" {
 		return "nodes";
 	}
-	isMappingElement(value: any): value is NodeSingular {
-		return value.isNode();
+	isMappingElement(value: unknown): value is NodeSingular {
+		return this.isNode(value);
 	}
 
 	initCytoScapeToModel() {

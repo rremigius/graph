@@ -1,11 +1,11 @@
 import Mozel, {Collection, deep, immediate} from "mozel";
-import {Core, EdgeSingular, EventObject, NodeSingular, SingularData} from "cytoscape";
+import cytoscape, {Core, EdgeSingular, EventObject, NodeSingular} from "cytoscape";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
-import {alphanumeric, check, Constructor, instanceOf} from "validation-kit";
+import {alphanumeric, check, Constructor} from "validation-kit";
 import log from "./Log";
 import {forEach, includes, isPlainObject, uniqueId} from "lodash";
-import data from "../demos/default/data";
 import {CollectionItemAddedEvent, CollectionItemRemovedEvent} from "mozel/dist/Collection";
+import {get, isFunction} from "./utils";
 
 export default abstract class ModelMappingAbstract<M extends Mozel, E extends NodeSingular|EdgeSingular> {
 	public static readonly CYTOSCAPE_NAMESPACE = 'modelGraph';
@@ -39,7 +39,15 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 		return ['id', 'gid', 'classes'];
 	}
 
-	isMappingModel(value:any):value is M {
+	isNode(value:unknown) {
+		return isFunction(get(value, 'isNode')) && (value as cytoscape.SingularData).isNode();
+	}
+
+	isEdge(value:unknown) {
+		return isFunction(get(value, 'isEdge')) && (value as cytoscape.SingularData).isEdge();
+	}
+
+	isMappingModel(value:unknown):value is M {
 		return value instanceof this.Model;
 	}
 
@@ -61,17 +69,8 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 		this.models.each(model => this.createElement(model));
 
 		// Watch models
-		this.models.on(CollectionItemAddedEvent, event => {
-			const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
-			log.log(`Model added: ${model}`)
-			this.createElement(model);
-		});
-		this.models.on(CollectionItemRemovedEvent, event => {
-			const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
-			log.log(`Model removed: ${model}`)
-			const ele = this.getElement(model);
-			if(ele) this.cy.remove(ele);
-		})
+		this.models.on(CollectionItemAddedEvent, this.onItemAdded);
+		this.models.on(CollectionItemRemovedEvent, this.onItemRemoved);
 
 		this.watchers = [
 			// Check that collection stays
@@ -100,6 +99,21 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 		this.cy.off('select', this.onSelect);
 		this.cy.off('unselect', this.onUnselect);
 		this.cy.off('remove', this.onRemove);
+		this.models.off(CollectionItemAddedEvent, this.onItemAdded);
+		this.models.off(CollectionItemRemovedEvent, this.onItemRemoved);
+	}
+
+	private onItemAdded = (event:CollectionItemAddedEvent<unknown>) => {
+		const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		log.log(`Model added: ${model}`)
+		this.createElement(model);
+	}
+
+	private onItemRemoved = (event:CollectionItemRemovedEvent<unknown>) => {
+		const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		log.log(`Model removed: ${model}`)
+		const ele = this.getElement(model);
+		if(ele) this.cy.remove(ele);
 	}
 
 	protected onSelect = (event:EventObject) => {
@@ -122,13 +136,20 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 		return this.models.find(node => this.isMappingModel(node) && this.getId(node) === element.id()) as M;
 	}
 
-	getId(node:M):string {
+	getId(node:Mozel):string {
 		return node.gid.toString();
 	}
 
 	getElement(model:M):E|undefined {
 		const ele = this.cy.getElementById(this.getId(model));
 		return this.isMappingElement(ele) && ele.length ? ele : undefined;
+	}
+	getElementId(model:M):string {
+		return this.getId(model);
+	}
+
+	shouldHaveElement(model:M):boolean {
+		return true;
 	}
 
 	protected _createMinimalElement(model:M, data:Record<string, any>) {
@@ -138,10 +159,14 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 		});
 	}
 	createElement(model:M):E {
+		if(!this.shouldHaveElement(model)) {
+			log.log(`Skipping element creation for ${model}.`);
+			return;
+		}
 		log.log(`Creating element: ${model}`);
 
 		const data:Record<string,any> = {
-			id: this.getId(model),
+			id: this.getElementId(model),
 			gid: model.gid
 		};
 		const ele = this._createMinimalElement(model, data);
@@ -165,13 +190,11 @@ export default abstract class ModelMappingAbstract<M extends Mozel, E extends No
 	}
 
 	updateElement(model:M) {
-		log.log(`Updating node element: ${model}`);
-
 		const ele = this.getElement(model);
 		if(!ele) {
-			log.error(`No node element found for ${model}`);
 			return;
 		}
+		log.log(`Updating node element: ${model}`);
 
 		// Set data
 		let data = this.getData(model);

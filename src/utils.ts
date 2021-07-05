@@ -5,6 +5,7 @@ export {
 	isArray,
 	isNumber,
 	isNil,
+	isEmpty,
 	isPlainObject,
 	uniqueId,
 	capitalize,

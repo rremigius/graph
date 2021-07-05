@@ -6,16 +6,20 @@ export default {
 			"data": {name: 'BBB1'}
 		},
 		{
+			"_type": "node",
 			"gid": 49841,
 			"label": "CCC",
 			"data": {},
-			"group": {"gid": 45573}
+			"group": {"gid": 45573},
+			"link": {"gid": 49048}
 		},
 		{
+			"_type": "node",
 			"gid": 42441,
 			"label": "DDD",
 			"data": {},
-			"group": {"gid": 45573}
+			"group": {"gid": 45573},
+			"link": {"gid": 49048}
 		},
 		{
 			"gid": 46929,
@@ -39,9 +43,11 @@ export default {
 			"data": {}
 		},
 		{
+			"_type": "node",
 			"gid": 49048,
 			"label": "CCC",
-			"data": {}
+			"data": {},
+			"link": {"gid": 49711}
 		},
 		{
 			"gid": 44599,
