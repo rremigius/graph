@@ -7,6 +7,7 @@ export {
 	isNil,
 	isEmpty,
 	isPlainObject,
+	isBoolean,
 	uniqueId,
 	capitalize,
 	forEach,

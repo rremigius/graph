@@ -15,7 +15,7 @@ export default [{
 		'background-color': (ele:NodeSingular) => getNodeColour(ele)
 	}
 }, {
-	selector: 'node[label]',
+	selector: '[label]',
 	style: {
 		'label': 'data(label)',
 	}
@@ -26,12 +26,7 @@ export default [{
 		'curve-style': 'bezier',
 		'arrow-scale': 1.3
 	}
-}, {
-	selector: 'edge[label]',
-	style: {
-		'label': 'data(label)'
-	}
-}, {
+},{
 	selector: 'node:parent',
 	style: {
 		'background-blacken': -0.5

@@ -6,7 +6,6 @@ export default {
 			"data": {name: 'BBB1'}
 		},
 		{
-			"_type": "node",
 			"gid": 49841,
 			"label": "CCC",
 			"data": {},
@@ -14,7 +13,6 @@ export default {
 			"link": {"gid": 49048}
 		},
 		{
-			"_type": "node",
 			"gid": 42441,
 			"label": "DDD",
 			"data": {},
@@ -43,7 +41,6 @@ export default {
 			"data": {}
 		},
 		{
-			"_type": "node",
 			"gid": 49048,
 			"label": "CCC",
 			"data": {},

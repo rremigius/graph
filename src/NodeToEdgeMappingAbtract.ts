@@ -1,10 +1,11 @@
 import {Core} from "cytoscape";
 import Mozel, {Collection} from "mozel";
 import {check, instanceOf} from "validation-kit";
-import EdgeModelMappingAbstract from "./EdgeModelMappingAbstract";
+import EdgeMappingAbstract from "./EdgeMappingAbstract";
 import {PropertyValue} from "mozel/dist/Property";
+import {isString} from "./utils";
 
-export default abstract class NodeToEdgeMappingAbstract<N extends Mozel> extends EdgeModelMappingAbstract<N> {
+export default abstract class NodeToEdgeMappingAbstract<N extends Mozel> extends EdgeMappingAbstract<N> {
 	property:string;
 	direction:'out'|'in';
 
@@ -44,7 +45,9 @@ export default abstract class NodeToEdgeMappingAbstract<N extends Mozel> extends
 		} catch(e) {
 			return;
 		}
-		const target = check<Mozel>(property, instanceOf(Mozel), 'Mozel', 'property');
-		return this.getId(target);
+		if(property instanceof Mozel) {
+			return this.getId(property);
+		}
+		return check<string>(property, isString, 'string', 'source/target id');
 	}
 }
