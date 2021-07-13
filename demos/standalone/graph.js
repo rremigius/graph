@@ -1,10 +1,7 @@
-import cytoscape from "./modules/cytoscape.esm.min.js";
 import {showForm} from "./form.js";
 import formSchemaNode from "./form-schema-node.js";
 import formSchemaEdge from "./form-schema-edge.js";
-
-cytoscape.use(window.cytoscapeContextMenus);
-cytoscape.use(window.cytoscapeEdgehandles);
+import style from "./style.js";
 
 const LAYOUTS = {
 	cose: {
@@ -16,48 +13,7 @@ const LAYOUTS = {
 
 const cy = cytoscape({
 	container: document.getElementById('graph'),
-	style: [{
-		selector: 'node',
-		style: {
-			'border-width': 1,
-			'border-color': '#ccc',
-			'background-color': ele => getNodeColour(ele)
-		}
-	}, {
-		selector: '[label]',
-		style: {
-			'label': 'data(label)',
-		}
-	}, {
-		selector: '[title]',
-		style: {
-			'label': 'data(title)'
-		}
-	}, {
-		selector: 'edge',
-		style: {
-			'target-arrow-shape': 'triangle',
-			'curve-style': 'bezier',
-			'arrow-scale': 1.3
-		}
-	}, {
-		selector: 'node:parent',
-		style: {
-			'background-blacken': -0.5
-		}
-	}, {
-		selector: ':selected',
-		style: {
-			'background-blacken': 0.5
-		}
-	}, {
-		selector: 'node.eh-handle',
-		style: {
-			'background-color': '#4dff00',
-			'height': 20,
-			'width': 20
-		}
-	}]
+	style: style
 });
 
 cy.contextMenus({
@@ -96,6 +52,53 @@ cy.edgehandles({
 		showEdgeForm({source: source.id(), target: target.id()});
 	}
 });
+
+// Background
+
+const background = new Image();
+background.onload = () => {
+	const bottomLayer = cy.cyCanvas({
+		zIndex: -1
+	});
+	const canvas = bottomLayer.getCanvas();
+	const ctx = canvas.getContext("2d");
+
+	cy.on("render cyCanvas.resize", evt => {
+		bottomLayer.resetTransform(ctx);
+		bottomLayer.clear(ctx);
+		bottomLayer.setTransform(ctx);
+
+		ctx.save();
+		// Draw a background
+		ctx.drawImage(background, 0, 0);
+
+		// Draw text that follows the model
+		ctx.font = "24px Helvetica";
+		ctx.fillStyle = "black";
+		ctx.fillText("This text follows the model", 200, 300);
+
+		// Draw shadows under nodes
+		ctx.shadowColor = "black";
+		ctx.shadowBlur = 25 * cy.zoom();
+		ctx.fillStyle = "white";
+		cy.nodes().forEach(node => {
+			const pos = node.position();
+			ctx.beginPath();
+			ctx.arc(pos.x, pos.y, 10, 0, 2 * Math.PI, false);
+			ctx.fill();
+		});
+		ctx.restore();
+
+		// Draw text that is fixed in the canvas
+		bottomLayer.resetTransform(ctx);
+		ctx.save();
+		ctx.font = "24px Helvetica";
+		ctx.fillStyle = "red";
+		ctx.fillText("This text is fixed", 200, 200);
+		ctx.restore();
+	});
+}
+background.src = "https://files.classcraft.com/classcraft-assets/images/event_scroll_middle.jpg";
 
 // Load data
 fetch('data.json').then(async response => {
