@@ -13,14 +13,18 @@ import EdgeMapping from "../../src/mappings/EdgeMapping";
 import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
 import ModelFactory from "./ModelFactory";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
+import DATA from "./server/data";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
 cytoscape.use( fcose );
 
+const session = window.location.hash.substring(1);
+
+const data = session.length ? {gid: 'root'} : DATA;
 const factory = new ModelFactory();
-const model = factory.create(GraphModel, {gid: "graph"});
-const sync = new MozelSyncClient({model});
+const model = factory.create(GraphModel, data);
+const client = new MozelSyncClient(model, 'http://localhost:3000', session);
 
 const cy = cytoscape({
 	container: document.getElementById('graph'),
@@ -66,7 +70,8 @@ const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
 });
 
 cy.ready(async ()=>{
-	await sync.start();
+	await client.start();
+	window.location.hash = '#' + client.session;
 
 	nodeMapping.start();
 	edgeMapping.start();

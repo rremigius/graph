@@ -1,5 +1,5 @@
 export default {
-	"gid": "graph",
+	"gid": "root",
 	"nodes": [
 		{
 			"gid": 45573,
