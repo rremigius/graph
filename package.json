@@ -9,10 +9,13 @@
     "cytoscape-context-menus": "^4.1.0",
     "cytoscape-edgehandles": "^3.6.0",
     "cytoscape-fcose": "^2.1.0",
+    "event-interface-mixin": "^0.0.8",
     "lodash": "^4.17.21",
     "log-control": "0.0.2",
     "md5": "^2.3.0",
     "mozel": "github:rremigius/mozel",
+    "mozel-form": "github:rremigius/mozel-form",
+    "mozel-sync": "github:rremigius/mozel-sync",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.4",
     "validation-kit": "0.0.7"
@@ -29,6 +32,9 @@
   },
   "scripts": {
     "start": "webpack",
+    "update-all": "npm run update-mozel && npm run update-mozel-sync",
+    "update-mozel": "npm remove mozel && npm i https://github.com/rremigius/mozel.git",
+    "update-mozel-sync": "npm remove mozel && npm i https://github.com/rremigius/mozel-sync.git",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

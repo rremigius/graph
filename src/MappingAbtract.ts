@@ -69,8 +69,8 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 		this.models.each(model => this.createElement(model));
 
 		// Watch models
-		this.models.on(CollectionItemAddedEvent, this.onItemAdded);
-		this.models.on(CollectionItemRemovedEvent, this.onItemRemoved);
+		this.models.events.added.on(this.onItemAdded);
+		this.models.events.removed.on(this.onItemRemoved);
 
 		this.watchers = [
 			// Check that collection stays
@@ -99,18 +99,18 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 		this.cy.off('select', this.onSelect);
 		this.cy.off('unselect', this.onUnselect);
 		this.cy.off('remove', this.onRemove);
-		this.models.off(CollectionItemAddedEvent, this.onItemAdded);
-		this.models.off(CollectionItemRemovedEvent, this.onItemRemoved);
+		this.models.events.added.off(this.onItemAdded);
+		this.models.events.removed.off(this.onItemRemoved);
 	}
 
 	private onItemAdded = (event:CollectionItemAddedEvent<unknown>) => {
-		const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
 		log.log(`Model added: ${model}`)
 		this.createElement(model);
 	}
 
 	private onItemRemoved = (event:CollectionItemRemovedEvent<unknown>) => {
-		const model = check<M>(event.data.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
 		log.log(`Model removed: ${model}`)
 		const ele = this.getElement(model);
 		if(ele) this.cy.remove(ele);

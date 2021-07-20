@@ -2,6 +2,7 @@ import Mozel from "mozel";
 import {EventObject, NodeSingular} from "cytoscape";
 import log from "./Log";
 import MappingAbstract from "./MappingAbtract";
+import {throttle} from "./utils";
 
 export default abstract class NodeMappingAbstract<M extends Mozel> extends MappingAbstract<M, NodeSingular> {
 	abstract getParentId(model:M):string;
@@ -21,6 +22,7 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 	initCytoScapeToModel() {
 		super.initCytoScapeToModel();
 		this.cy.on('dragfree', this.onDragFree);
+		this.cy.on('layoutready', this.onLayoutReady);
 	}
 
 	stop() {
@@ -28,13 +30,17 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		this.cy.off('dragfree', this.onDragFree);
 	}
 
-	onDragFree = (event:EventObject) => {
+	onLayoutReady = (event:EventObject) => {
+		this.updateModelPositions();
+	};
+
+	onDragFree = throttle((event:EventObject) => {
 		const node = this.getModel(event.target);
 		if(!node) return;
 		log.log(`Updating node position: ${node}`);
 		this.updateModelPosition(node);
 		return node;
-	}
+	}, 100);
 
 	updateElement(node:M) {
 		const ele = super.updateElement(node);

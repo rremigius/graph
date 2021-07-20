@@ -5,7 +5,7 @@ export default class EntityModel extends Mozel {
 	@property(String)
 	label?:string;
 
-	@property(GenericMozel, {required, default:()=>new GenericMozel()})
+	@property(GenericMozel, {required})
 	data!:GenericMozel;
 
 	@property(Boolean)

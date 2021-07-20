@@ -7,29 +7,21 @@ import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import fcose from "cytoscape-fcose";
 
 import GraphModel from "../../src/models/GraphModel";
-import DATA from "./data";
 import style from "./style";
 import NodeMapping from "../../src/mappings/NodeMapping";
 import EdgeMapping from "../../src/mappings/EdgeMapping";
-import NodeModel from "../../src/models/NodeModel";
-import {MozelFactory, property, reference} from "mozel";
 import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
+import ModelFactory from "./ModelFactory";
+import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
 cytoscape.use( fcose );
 
-class Node extends NodeModel {
-	static get type() {
-		return 'node';
-	}
-	@property(Node, {reference})
-	link?:Node;
-}
-const factory = new MozelFactory();
-factory.dependencies.bind(NodeModel).to(Node);
+const factory = new ModelFactory();
+const model = factory.create(GraphModel, {gid: "graph"});
+const sync = new MozelSyncClient({model});
 
-const model = factory.create(GraphModel, DATA);
 const cy = cytoscape({
 	container: document.getElementById('graph'),
 	style: style
@@ -73,16 +65,27 @@ const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
 	}
 });
 
-cy.ready(()=>{
+cy.ready(async ()=>{
+	await sync.start();
+
 	nodeMapping.start();
 	edgeMapping.start();
 	linkMapping.start();
 
 	setTimeout(() => {
-		cy.layout({
-			name: 'fcose',
-			animate: true,
-			idealEdgeLength: ()=>100
-		} as any).run();
+		setLayout('fcose');
 	});
 });
+
+function setLayout(layout:string) {
+	cy.layout({
+		name: layout,
+		animate: true,
+		idealEdgeLength: ()=>100
+	} as any).run();
+	document.querySelector('.layout-name').innerHTML = layout;
+}
+
+(window as any).graph = {
+	setLayout
+}

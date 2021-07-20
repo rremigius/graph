@@ -12,5 +12,6 @@ export {
 	capitalize,
 	forEach,
 	isFunction,
-	has
+	has,
+	throttle
 } from "lodash";
