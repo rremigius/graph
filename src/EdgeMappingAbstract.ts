@@ -1,9 +1,9 @@
 import Mozel from "mozel";
 import {EdgeSingular} from "cytoscape";
-import ModelMappingAbstract from "./MappingAbtract";
-import {isEmpty, isNil} from "./utils";
+import MappingAbstract from "./MappingAbtract";
+import {isEmpty} from "./utils";
 
-export default abstract class EdgeMappingAbstract<M extends Mozel> extends ModelMappingAbstract<M, EdgeSingular> {
+export default abstract class EdgeMappingAbstract<M extends Mozel> extends MappingAbstract<M, EdgeSingular> {
 	abstract getSourceId(model:M):string;
 	abstract getTargetId(model:M):string;
 

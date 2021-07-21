@@ -7,10 +7,10 @@ export default class EdgeModel extends EntityModel {
 		return 'edge';
 	}
 	@property(NodeModel, {reference})
-	source!:NodeModel;
+	source?:NodeModel;
 
 	@property(NodeModel, {reference})
-	target!:NodeModel;
+	target?:NodeModel;
 
 	toString() {
 		const label = this.label ? ':' + this.label : '';

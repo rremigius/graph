@@ -18,10 +18,12 @@ export default class EdgeMapping extends EdgeMappingAbstract<EdgeModel> {
 	}
 
 	getSourceId(edge: EdgeModel): string {
+		if(!edge.source) return;
 		return edge.source.gid.toString();
 	}
 
 	getTargetId(edge: EdgeModel): string {
+		if(!edge.target) return;
 		return edge.target.gid.toString();
 	}
 }
