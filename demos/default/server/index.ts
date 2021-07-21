@@ -1,5 +1,6 @@
 import GraphModel from "../../../src/models/GraphModel";
 import MozelSyncServerHub from "mozel-sync/dist/MozelSyncServerHub";
+import ModelFactory from "../ModelFactory";
 
 const server = require('http').createServer();
 const io = require('socket.io')(server, {
@@ -8,5 +9,5 @@ const io = require('socket.io')(server, {
 });
 server.listen(3000);
 
-const hub = new MozelSyncServerHub({io, createSessionModel: ()=>GraphModel.create({gid: 'root'})});
+const hub = new MozelSyncServerHub({io, Factory: ModelFactory, RootModel: GraphModel});
 hub.start();
