@@ -25,6 +25,15 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		this.cy.on('layoutready', this.onLayoutReady);
 	}
 
+	setGrabbable(model:M) {
+		// For override
+		return;
+	}
+	isGrabbable(model:M) {
+		// For override
+		return true;
+	}
+
 	stop() {
 		super.stop();
 		this.cy.off('dragfree', this.onDragFree);
@@ -57,6 +66,13 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 
 		// Set state
 		this.isSelected(node) ? ele.select() : ele.unselect();
+
+		// Allow/disallow user to move the node
+		if(this.isGrabbable(node)) {
+			ele.grabify();
+		} else {
+			ele.ungrabify();
+		}
 
 		return ele;
 	}

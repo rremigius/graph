@@ -1,12 +1,9 @@
 import EdgeMappingAbstract from "../EdgeMappingAbstract";
 import EdgeModel from "../models/EdgeModel";
 
-export default class EdgeMapping extends EdgeMappingAbstract<EdgeModel> {
-	getData(model: EdgeModel): Record<string, any> {
-		return {
-			...model.data.$export(),
-			label: model.label
-		};
+export default class StandardEdgeMapping extends EdgeMappingAbstract<EdgeModel> {
+	get dataProperties() {
+		return ['label'];
 	}
 
 	isSelected(model: EdgeModel): boolean {

@@ -8,13 +8,14 @@ import fcose from "cytoscape-fcose";
 
 import GraphModel from "../../src/models/GraphModel";
 import style from "./style";
-import NodeMapping from "../../src/mappings/NodeMapping";
-import EdgeMapping from "../../src/mappings/EdgeMapping";
+import StandardNodeMapping from "../../src/mappings/StandardNodeMapping";
+import StandardEdgeMapping from "../../src/mappings/StandardEdgeMapping";
 import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
 import ModelFactory from "./ModelFactory";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
 import DATA from "./server/data-small";
 import {get} from "../../src/utils";
+import Node from "./Node";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
@@ -36,9 +37,23 @@ const cy = cytoscape({
 	container: document.getElementById('graph'),
 	style: style
 });
+
+class NodeMapping extends StandardNodeMapping {
+	get dataProperties() {
+		return [...super.dataProperties, 'owner'];
+	}
+	isGrabbable(model: Node): boolean {
+		return !model.owner || model.owner === client.sync.id;
+	}
+}
+class EdgeMapping extends StandardEdgeMapping {
+	get dataProperties() {
+		return [...super.dataProperties, 'owner'];
+	}
+}
 const nodeMapping = new NodeMapping(cy, model, model.nodes);
 const edgeMapping = new EdgeMapping(cy, model, model.edges);
-// const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
+const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
 
 (cy as any).contextMenus({
 	menuItems: [{
@@ -81,11 +96,15 @@ cy.ready(async ()=>{
 
 	nodeMapping.start();
 	edgeMapping.start();
-	// linkMapping.start();
+	linkMapping.start();
 
-	setTimeout(() => {
-		setLayout('fcose');
-	});
+	if(client.isSessionOwner) {
+		setTimeout(() => {
+			setLayout('fcose');
+		});
+	} else {
+		cy.fit();
+	}
 });
 
 function setLayout(layout:string) {

@@ -21,6 +21,10 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	protected modelWatchers:Record<alphanumeric, PropertyWatcher[]> = {};
 	protected updatesNextTick:Record<alphanumeric, M> = {};
 
+	get dataProperties():string[] {
+		return [];
+	}
+
 	public readonly id:string;
 
 	constructor(cy:Core, model:Mozel, collection:Collection<M>) {
@@ -36,7 +40,16 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	abstract isMappingElement(value:any):value is E;
 	abstract isSelected(model:M):boolean;
 	abstract setSelected(model:M, selected:boolean):void;
-	abstract getData(model:M):Record<string, any>;
+
+	getData(model:M):Record<string, any> {
+		const data:Record<string, any> = {};
+		for(let key of this.dataProperties) {
+			if(model.$has(key)) {
+				data[key] = model.$get(key);
+			}
+		}
+		return data;
+	}
 
 	get reservedKeys() {
 		return ['id', 'gid', 'classes'];
@@ -155,6 +168,7 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 
 	shouldHaveElement(model:M):boolean {
+		// For override
 		return true;
 	}
 

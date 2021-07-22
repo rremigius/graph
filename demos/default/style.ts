@@ -3,8 +3,8 @@ import {NodeSingular} from "cytoscape";
 
 function getNodeColour(node:NodeSingular) {
 	let colour = '#777';
-	const label = node.data('label');
-	return label ? '#' + md5(label).substring(0,6) : colour;
+	const text = node.data('owner') || node.data('label');
+	return text ? '#' + md5(text).substring(0,6) : colour;
 }
 
 export default [{

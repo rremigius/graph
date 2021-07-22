@@ -1,12 +1,8 @@
-import Mozel, {Collection, collection, GenericMozel, property, required} from "mozel";
-import {isEmpty} from "lodash";
+import Mozel, {property} from "mozel";
 
 export default class EntityModel extends Mozel {
 	@property(String)
 	label?:string;
-
-	@property(GenericMozel, {required})
-	data!:GenericMozel;
 
 	@property(Boolean)
 	selected?:boolean;
