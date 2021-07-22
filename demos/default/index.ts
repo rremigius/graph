@@ -13,7 +13,8 @@ import EdgeMapping from "../../src/mappings/EdgeMapping";
 import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
 import ModelFactory from "./ModelFactory";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
-import DATA from "./server/data";
+import DATA from "./server/data-small";
+import {get} from "../../src/utils";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
@@ -25,6 +26,11 @@ const data = session.length ? {gid: 'root'} : DATA;
 const factory = new ModelFactory();
 const model = factory.create(GraphModel, data);
 const client = new MozelSyncClient(model, 'http://localhost:3000', session);
+client.sync.shouldSync = (model, syncID) => {
+	const owner = get(model, 'owner');
+	// Only sync models that 1) have no owner, 2) are changed by server or 3) are owned by the changing Sync
+	return !owner || syncID === client.serverSyncID || owner === syncID;
+};
 
 const cy = cytoscape({
 	container: document.getElementById('graph'),
@@ -32,7 +38,7 @@ const cy = cytoscape({
 });
 const nodeMapping = new NodeMapping(cy, model, model.nodes);
 const edgeMapping = new EdgeMapping(cy, model, model.edges);
-const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
+// const linkMapping = new NodeToEdgeMapping(cy, model, model.nodes, 'link');
 
 (cy as any).contextMenus({
 	menuItems: [{
@@ -75,7 +81,7 @@ cy.ready(async ()=>{
 
 	nodeMapping.start();
 	edgeMapping.start();
-	linkMapping.start();
+	// linkMapping.start();
 
 	setTimeout(() => {
 		setLayout('fcose');

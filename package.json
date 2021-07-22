@@ -13,6 +13,7 @@
     "lodash": "^4.17.21",
     "log-control": "0.0.2",
     "md5": "^2.3.0",
+    "mozel": "github:rremigius/mozel",
     "mozel-form": "github:rremigius/mozel-form",
     "mozel-sync": "github:rremigius/mozel-sync",
     "ts-loader": "^9.2.3",

@@ -7,4 +7,6 @@ export default class Node extends NodeModel {
 	}
 	@property(Node, {reference})
 	link?:Node;
+	@property(String)
+	owner?:string;
 }

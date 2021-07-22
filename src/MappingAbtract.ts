@@ -2,20 +2,23 @@ import Mozel, {Collection, deep, immediate} from "mozel";
 import cytoscape, {Core, EdgeSingular, EventObject, NodeSingular} from "cytoscape";
 import PropertyWatcher from "mozel/dist/PropertyWatcher";
 import {alphanumeric, check, Constructor} from "validation-kit";
-import log from "./Log";
+import Log from "./Log";
 import {forEach, includes, isPlainObject, uniqueId} from "lodash";
 import {CollectionItemAddedEvent, CollectionItemRemovedEvent} from "mozel/dist/Collection";
 import {get, isFunction} from "./utils";
+
+const log = Log.instance("mapping");
 
 export default abstract class MappingAbstract<M extends Mozel, E extends NodeSingular|EdgeSingular> {
 	public static readonly CYTOSCAPE_NAMESPACE = 'modelGraph';
 	protected readonly cy:Core;
 	protected readonly model:Mozel;
 	protected readonly path:string;
-	protected readonly models:Collection<M>;
 	protected readonly Model:Constructor<M>;
+	protected models:Collection<M>;
 
 	protected watchers:PropertyWatcher[] = [];
+	protected modelWatchers:Record<alphanumeric, PropertyWatcher[]> = {};
 	protected updatesNextTick:Record<alphanumeric, M> = {};
 
 	public readonly id:string;
@@ -65,30 +68,18 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	protected initModelToCytoScape() {
 		const path = this.path;
 
-		// Create first set of elements
-		this.models.each(model => this.createElement(model));
-
-		// Watch models
-		this.models.events.added.on(this.onItemAdded);
-		this.models.events.removed.on(this.onItemRemoved);
-
 		this.watchers = [
-			// Check that collection stays
 			this.model.$watch(path, ({newValue}) => {
 				if(newValue !== this.models) {
-					log.error("Collection should not be replaced!");
-					this.stop();
+					this.models.events.added.off(this.onItemAdded);
+					this.models.events.removed.off(this.onItemRemoved);
+					this.models.each(item => this.removeItem(item));
+					this.models = newValue as Collection<M>;
 				}
-			}, {immediate}),
-
-			// Watch properties
-			this.model.$watch(path + '.*', ({newValue, oldValue}) => {
-				// These changes are for the shallow watcher to handle
-				if(!this.isMappingModel(newValue) || !this.isMappingModel(oldValue)) return;
-				if(newValue.gid !== oldValue.gid) return;
-
-				this.updateNextTick(newValue);
-			}, {deep, immediate}),
+				this.models.events.added.on(this.onItemAdded);
+				this.models.events.removed.on(this.onItemRemoved);
+				this.models.each(item => this.addItem(item));
+			}, {immediate})
 		];
 	}
 
@@ -103,15 +94,30 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 		this.models.events.removed.off(this.onItemRemoved);
 	}
 
-	private onItemAdded = (event:CollectionItemAddedEvent<unknown>) => {
+	protected onItemAdded = (event:CollectionItemAddedEvent<unknown>) => {
 		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
-		log.log(`Model added: ${model}`)
-		this.createElement(model);
+		this.addItem(model);
 	}
 
-	private onItemRemoved = (event:CollectionItemRemovedEvent<unknown>) => {
+	protected onItemRemoved = (event:CollectionItemRemovedEvent<unknown>) => {
 		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		this.removeItem(model);
+	}
+
+	protected addItem(model:M) {
+		log.log(`Model added: ${model}`)
+		this.createElement(model);
+
+		if(!(model.gid in this.modelWatchers)) this.modelWatchers[model.gid] = [];
+		this.modelWatchers[model.gid].push(model.$watch('*', () => {
+			this.updateNextTick(model);
+		}));
+	}
+	protected removeItem(model:M) {
 		log.log(`Model removed: ${model}`)
+
+		forEach(this.modelWatchers[model.gid], watcher => model.$removeWatcher(watcher));
+
 		const ele = this.getElement(model);
 		if(ele) this.cy.remove(ele);
 	}
@@ -160,7 +166,7 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 	createElement(model:M):E {
 		if(!this.shouldHaveElement(model)) {
-			log.log(`Skipping element creation for ${model}.`);
+			log.log(`Skipping element creation for ${model}.`, model);
 			return;
 		}
 		log.log(`Creating element: ${model}`);
