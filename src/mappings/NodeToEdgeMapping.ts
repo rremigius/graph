@@ -1,11 +1,11 @@
 import NodeToEdgeMappingAbstract from "../NodeToEdgeMappingAbtract";
-import NodeModel from "../models/NodeModel";
+import StandardNodeModel from "../models/StandardNodeModel";
 
-export default class NodeToEdgeMapping extends NodeToEdgeMappingAbstract<NodeModel> {
-	isSelected(model: NodeModel): boolean {
+export default class NodeToEdgeMapping extends NodeToEdgeMappingAbstract<StandardNodeModel> {
+	isSelected(model: StandardNodeModel): boolean {
 		return false;
 	}
 
-	setSelected(model: NodeModel, selected: boolean): void {
+	setSelected(model: StandardNodeModel, selected: boolean): void {
 	}
 }

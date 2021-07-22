@@ -33,6 +33,13 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		// For override
 		return true;
 	}
+	setLocked(model:M) {
+		// For override
+		return;
+	}
+	isLocked(model:M) {
+		return false;
+	}
 
 	stop() {
 		super.stop();
@@ -72,6 +79,13 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 			ele.grabify();
 		} else {
 			ele.ungrabify();
+		}
+
+		// Lock/unlock
+		if(this.isLocked(node)) {
+			ele.lock();
+		} else {
+			ele.unlock();
 		}
 
 		return ele;

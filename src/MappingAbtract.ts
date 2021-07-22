@@ -108,12 +108,12 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 
 	protected onItemAdded = (event:CollectionItemAddedEvent<unknown>) => {
-		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		const model = check<M>(event.item, item => this.isMappingModel(item), 'item');
 		this.addItem(model);
 	}
 
 	protected onItemRemoved = (event:CollectionItemRemovedEvent<unknown>) => {
-		const model = check<M>(event.item, item => this.isMappingModel(item), this.Model.name, 'item');
+		const model = check<M>(event.item, item => this.isMappingModel(item), 'item');
 		this.removeItem(model);
 	}
 

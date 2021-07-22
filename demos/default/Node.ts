@@ -1,7 +1,7 @@
-import NodeModel from "../../src/models/NodeModel";
+import StandardNodeModel from "../../src/models/StandardNodeModel";
 import {property, reference} from "mozel";
 
-export default class Node extends NodeModel {
+export default class Node extends StandardNodeModel {
 	static get type() {
 		return 'node';
 	}

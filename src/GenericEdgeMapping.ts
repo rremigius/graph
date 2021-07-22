@@ -3,6 +3,7 @@ import Mozel, {Collection} from "mozel";
 import {isBoolean, isFunction, isString} from "./utils";
 import {Core} from "cytoscape";
 import {check, isAlphanumeric} from "validation-kit";
+import {IS_ALPHANUMERIC, IS_BOOLEAN} from "validation-kit/dist/validators";
 
 export type GenericEdgeMappingOptions = {
 	getElementId?:string|((mozel:Mozel)=>string),
@@ -27,7 +28,7 @@ export default class GenericEdgeMapping extends EdgeMappingAbstract<Mozel> {
 		if(isFunction(getElementId)) return getElementId(model);
 
 		let value = model.$path(getElementId);
-		value = check<string>(value, isAlphanumeric, 'string', 'elementId');
+		value = check(value, IS_ALPHANUMERIC, 'elementId');
 		return value.toString();
 	}
 
@@ -53,7 +54,7 @@ export default class GenericEdgeMapping extends EdgeMappingAbstract<Mozel> {
 		let value = model.$path(getSourceId);
 		if(!value) return;
 
-		value = check<string>(value, isAlphanumeric, 'string', 'sourceId');
+		value = check<string>(value, isAlphanumeric, 'sourceId');
 		return value.toString();
 	}
 
@@ -65,7 +66,7 @@ export default class GenericEdgeMapping extends EdgeMappingAbstract<Mozel> {
 		let value = model.$path(getTargetId);
 		if(!value) return;
 
-		value = check<string>(value, isAlphanumeric, 'string', 'targetId');
+		value = check(value, IS_ALPHANUMERIC, 'targetId');
 		return value.toString();
 	}
 
@@ -77,7 +78,7 @@ export default class GenericEdgeMapping extends EdgeMappingAbstract<Mozel> {
 		const value = model.$path(isSelected);
 		if(!value) return false;
 
-		return check<boolean>(value, isBoolean, 'boolean', 'selected');
+		return check(value, IS_BOOLEAN, 'selected');
 	}
 
 	setSelected(model: Mozel, selected: boolean): void {

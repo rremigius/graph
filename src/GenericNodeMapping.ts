@@ -3,6 +3,7 @@ import Mozel, {Collection} from "mozel";
 import {Core} from "cytoscape";
 import {isBoolean, isFunction, isNumber, isPlainObject, isString} from "./utils";
 import {check, isAlphanumeric} from "validation-kit";
+import {IS_ALPHANUMERIC, IS_BOOLEAN} from "validation-kit/dist/validators";
 
 export type GenericNodeMappingOptions = {
 	getElementId?:string|((mozel:Mozel)=>string),
@@ -27,7 +28,7 @@ export default class GenericNodeMapping extends NodeMappingAbstract<Mozel> {
 		if(!getElementId) return this.getId(model);
 
 		let value = isFunction(getElementId) ? getElementId(model) : model.$path(getElementId);
-		value = check<string>(value, isAlphanumeric, 'string', 'elementId');
+		value = check(value, IS_ALPHANUMERIC, 'elementId');
 		return value.toString();
 	}
 
@@ -51,7 +52,7 @@ export default class GenericNodeMapping extends NodeMappingAbstract<Mozel> {
 		let value = isFunction(getParentId) ? getParentId(model) : model.$path(getParentId);
 		if(!value) return;
 
-		value = check<string>(value, isAlphanumeric, 'string', 'parentId');
+		value = check(value, IS_ALPHANUMERIC, 'parentId');
 		return value.toString();
 	}
 
@@ -86,7 +87,7 @@ export default class GenericNodeMapping extends NodeMappingAbstract<Mozel> {
 		const value = isFunction(isSelected) ? isSelected(model) : model.$path(isSelected);
 		if(!value) return false;
 
-		return check<boolean>(value, isBoolean, 'boolean', 'selected');
+		return check(value, IS_BOOLEAN, 'selected');
 	}
 
 	setSelected(model: Mozel, selected: boolean): void {

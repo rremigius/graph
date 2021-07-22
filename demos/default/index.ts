@@ -6,7 +6,7 @@ import 'cytoscape-context-menus/cytoscape-context-menus.css';
 // @ts-ignore
 import fcose from "cytoscape-fcose";
 
-import GraphModel from "../../src/models/GraphModel";
+import StandardGraphModel from "../../src/models/StandardGraphModel";
 import style from "./style";
 import StandardNodeMapping from "../../src/mappings/StandardNodeMapping";
 import StandardEdgeMapping from "../../src/mappings/StandardEdgeMapping";
@@ -16,6 +16,9 @@ import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
 import DATA from "./server/data-small";
 import {get} from "../../src/utils";
 import Node from "./Node";
+import StandardNodeModel from "../../src/models/StandardNodeModel";
+import {check, instanceOf} from "validation-kit";
+import {IS_INSTANCE_OF} from "validation-kit/dist/validators";
 
 cytoscape.use( edgehandles as any );
 cytoscape.use( contextMenus );
@@ -25,7 +28,7 @@ const session = window.location.hash.substring(1);
 
 const data = session.length ? {gid: 'root'} : DATA;
 const factory = new ModelFactory();
-const model = factory.create(GraphModel, data);
+const model = factory.create(StandardGraphModel, data);
 const client = new MozelSyncClient(model, 'http://localhost:3000', session);
 client.sync.shouldSync = (model, syncID) => {
 	const owner = get(model, 'owner');
@@ -42,8 +45,9 @@ class NodeMapping extends StandardNodeMapping {
 	get dataProperties() {
 		return [...super.dataProperties, 'owner'];
 	}
-	isGrabbable(model: Node): boolean {
-		return !model.owner || model.owner === client.sync.id;
+	isGrabbable(model: StandardNodeModel): boolean {
+		const $model = check(model, IS_INSTANCE_OF(Node), 'model');
+		return !$model.owner || $model.owner === client.sync.id;
 	}
 }
 class EdgeMapping extends StandardEdgeMapping {

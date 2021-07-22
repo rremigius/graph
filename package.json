@@ -17,7 +17,7 @@
     "mozel-sync": "github:rremigius/mozel-sync",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.4",
-    "validation-kit": "0.0.7"
+    "validation-kit": "^0.0.8"
   },
   "devDependencies": {
     "@types/cytoscape-edgehandles": "^3.6.0",

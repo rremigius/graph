@@ -4,6 +4,7 @@ import {check, instanceOf} from "validation-kit";
 import EdgeMappingAbstract from "./EdgeMappingAbstract";
 import {PropertyValue} from "mozel/dist/Property";
 import {isString} from "./utils";
+import {IS_STRING} from "validation-kit/dist/validators";
 
 export default abstract class NodeToEdgeMappingAbstract<N extends Mozel> extends EdgeMappingAbstract<N> {
 	property:string;
@@ -48,6 +49,6 @@ export default abstract class NodeToEdgeMappingAbstract<N extends Mozel> extends
 		if(property instanceof Mozel) {
 			return this.getId(property);
 		}
-		return check<string>(property, isString, 'string', 'source/target id');
+		return check(property, IS_STRING, 'source/target id');
 	}
 }

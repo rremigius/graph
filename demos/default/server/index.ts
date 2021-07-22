@@ -1,4 +1,4 @@
-import GraphModel from "../../../src/models/GraphModel";
+import StandardGraphModel from "../../../src/models/StandardGraphModel";
 import MozelSyncServerHub from "mozel-sync/dist/MozelSyncServerHub";
 import {Namespace, Server} from "socket.io";
 import ModelFactory from "../ModelFactory";
@@ -13,10 +13,10 @@ server.listen(3000);
 
 class GraphHub extends MozelSyncServerHub {
 	constructor(io:Server) {
-		super({io, Factory: ModelFactory, RootModel: GraphModel, useClientModel: true});
+		super({io, Factory: ModelFactory, RootModel: StandardGraphModel, useClientModel: true});
 	}
 
-	createSyncServer(model:GraphModel, io:Namespace) {
+	createSyncServer(model:StandardGraphModel, io:Namespace) {
 		const server = super.createSyncServer(model, io);
 		server.sync.shouldSync = (model, syncID) => {
 			const owner = get(model, 'owner');
