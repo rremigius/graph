@@ -5,7 +5,7 @@ import MappingAbstract from "./MappingAbtract";
 import {throttle} from "./utils";
 
 export default abstract class NodeMappingAbstract<M extends Mozel> extends MappingAbstract<M, NodeSingular> {
-	abstract getParentId(model:M):string;
+	abstract getParentId(model:M):string|undefined;
 	abstract getPosition(model:M):{x:number, y:number};
 	abstract setPosition(model:M, x:number, y:number):void;
 
