@@ -1,0 +1,288 @@
+{
+	"nodes": [
+		{
+			"gid": 45573,
+			"label": "Document",
+			"title": "Bird population report"
+		},
+		{
+			"gid": 49841,
+			"label": "Article",
+			"parent": 45573
+		},
+		{
+			"gid": 42441,
+			"label": "Book",
+			"parent": 45573
+		},
+		{
+			"gid": 46929,
+			"label": "Website",
+			"parent": 45573
+		},
+		{
+			"gid": 46715,
+			"label": "Website"
+		},
+		{
+			"gid": 46926,
+			"label": "Website",
+			"name": "News website"
+		},
+		{
+			"gid": 49711,
+			"label": "Article"
+		},
+		{
+			"gid": 49048,
+			"label": "Article"
+		},
+		{
+			"gid": 44599,
+			"label": "Book"
+		},
+		{
+			"gid": 42919,
+			"label": "Book"
+		},
+		{
+			"gid": 49086,
+			"label": "Article"
+		},
+		{
+			"gid": 46927,
+			"label": "Website",
+			"name": "Website2"
+		},
+		{
+			"gid": 46928,
+			"label": "Website"
+		},
+		{
+			"gid": 44633,
+			"label": "Book"
+		},
+		{
+			"gid": 49609,
+			"label": "Article"
+		},
+		{
+			"gid": 44369,
+			"label": "Book"
+		},
+		{
+			"gid": 46874,
+			"label": "Website"
+		},
+		{
+			"gid": 47137,
+			"label": "Website"
+		},
+		{
+			"gid": 47136,
+			"label": "Website"
+		},
+		{
+			"gid": 45970,
+			"label": "Website"
+		},
+		{
+			"gid": 45746,
+			"label": "Website"
+		},
+		{
+			"gid": 46567,
+			"label": "Website"
+		},
+		{
+			"gid": 46434,
+			"label": "Website"
+		},
+		{
+			"gid": 46566,
+			"label": "Website"
+		}
+	],
+	"edges": [
+		{
+			"gid": 58559,
+			"label": "CAUSES",
+			"source": {"gid": 45573 },
+			"target": {"gid": 49841 }
+		},
+		{
+			"gid": 56980,
+			"label": "PARENT",
+			"source": {"gid": 42441 },
+			"target": {"gid": 45573 }
+		},
+		{
+			"gid": 53758,
+			"label": "PROPERTY",
+			"source": {"gid": 42441 },
+			"target": {"gid": 46929 }
+		},
+		{
+			"gid": 51794,
+			"label": "PROPERTY",
+			"source": {"gid": 42441 },
+			"target": {"gid": 46715 }
+		},
+		{
+			"gid": 61434,
+			"label": "CAUSES",
+			"source": {"gid": 46929 },
+			"target": {"gid": 49841 }
+		},
+		{
+			"gid": 53070,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46929 }
+		},
+		{
+			"gid": 53069,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46929 }
+		},
+		{
+			"gid": 57929,
+			"label": "CAUSES",
+			"source": {"gid": 46715 },
+			"target": {"gid": 49711 }
+		},
+		{
+			"gid": 57930,
+			"label": "CAUSES",
+			"source": {"gid": 46715 },
+			"target": {"gid": 49048 }
+		},
+		{
+			"gid": 51792,
+			"label": "PROPERTY",
+			"source": {"gid": 44599 },
+			"target": {"gid": 46715 }
+		},
+		{
+			"gid": 51793,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 46715 }
+		},
+		{
+			"gid": 61429,
+			"label": "CAUSES",
+			"source": {"gid": 46926 },
+			"target": {"gid": 49086 }
+		},
+		{
+			"gid": 53065,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46927 }
+		},
+		{
+			"gid": 53067,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46928 }
+		},
+		{
+			"gid": 53064,
+			"label": "PROPERTY",
+			"source": {"gid": 44633 },
+			"target": {"gid": 46926 }
+		},
+		{
+			"gid": 53063,
+			"label": "PROPERTY",
+			"source": {"gid": 44633 },
+			"target": {"gid": 46926 }
+		},
+		{
+			"gid": 53068,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46928 }
+		},
+		{
+			"gid": 53066,
+			"label": "PROPERTY",
+			"source": {"gid": 46926 },
+			"target": {"gid": 46927 }
+		},
+		{
+			"gid": 61431,
+			"label": "CAUSES",
+			"source": {"gid": 46927 },
+			"target": {"gid": 49609 }
+		},
+		{
+			"gid": 61432,
+			"label": "CAUSES",
+			"source": {"gid": 46928 },
+			"target": {"gid": 49609 }
+		},
+		{
+			"gid": 55425,
+			"label": "PROPERTY",
+			"source": {"gid": 44369 },
+			"target": {"gid": 46928 }
+		},
+		{
+			"gid": 55634,
+			"label": "PROPERTY",
+			"source": {"gid": 44599 },
+			"target": {"gid": 46874 }
+		},
+		{
+			"gid": 54140,
+			"label": "PROPERTY",
+			"source": {"gid": 44599 },
+			"target": {"gid": 47137 }
+		},
+		{
+			"gid": 54134,
+			"label": "PROPERTY",
+			"source": {"gid": 44599 },
+			"target": {"gid": 47136 }
+		},
+		{
+			"gid": 49042,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 45970 }
+		},
+		{
+			"gid": 52452,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 45746 }
+		},
+		{
+			"gid": 51757,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 46567 }
+		},
+		{
+			"gid": 49680,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 46434 }
+		},
+		{
+			"gid": 51009,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 46566 }
+		},
+		{
+			"gid": 49043,
+			"label": "PROPERTY",
+			"source": {"gid": 42919 },
+			"target": {"gid": 45970 }
+		}
+	]
+}

@@ -18,6 +18,18 @@
 			#graph {
 				flex: 1;
 			}
+
+			#modal {
+				position: absolute;
+				inset: 0;
+				background-color: rgba(0,0,0, 0.2);
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+			#modal.hide {
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
@@ -52,6 +64,14 @@
 		<!-- Graph -->
 		<div id="graph"></div>
 
-		<script src="graph.js"></script>
+		<!-- Modal -->
+		<div id="modal" class="hide">
+			<div class="card container">
+				<div id="modal-title" class="card-header"></div>
+				<div id="modal-content" class="card-body"></div>
+			</div>
+		</div>
+
+		<script src="demo.js"></script>
 	</body>
 </html>

@@ -4,7 +4,7 @@ const demo = process.env.DEMO || 'default';
 console.log(`Building ${demo}...`);
 
 module.exports = {
-	entry: `./demos/${demo}/index.ts`,
+	entry: `./demos/${demo}/demo.ts`,
 	mode: "development",
 	devtool: "eval-source-map",
 	module: {
@@ -24,7 +24,7 @@ module.exports = {
 		extensions: ['.tsx', '.ts', '.js'],
 	},
 	output: {
-		filename: 'graph.js',
+		filename: 'demo.js',
 		path: path.resolve(__dirname, `./demos/${demo}`),
 	},
 };

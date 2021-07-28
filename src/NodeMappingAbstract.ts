@@ -21,7 +21,11 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 
 	initCytoScapeToModel() {
 		super.initCytoScapeToModel();
-		this.cy.on('dragfree', this.onDragFree);
+		this.cy.on('position', this.onPosition);
+
+		// some layouts do not fire position/layoutready events so at least let's update the position when clicked
+		// to prevent it from jumping to its last known position
+		this.cy.on('click', this.onPosition);
 		this.cy.on('layoutready', this.onLayoutReady);
 	}
 
@@ -43,20 +47,22 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 
 	stop() {
 		super.stop();
-		this.cy.off('dragfree', this.onDragFree);
+		this.cy.off('position', this.onPosition);
+		this.cy.off('click', this.onPosition);
+		this.cy.off('layoutready', this.onLayoutReady);
 	}
 
 	onLayoutReady = (event:EventObject) => {
 		this.updateModelPositions();
 	};
 
-	onDragFree = throttle((event:EventObject) => {
+	onPosition = throttle((event:EventObject) => {
 		const node = this.getModel(event.target);
 		if(!node) return;
 		log.log(`Updating node position: ${node}`);
 		this.updateModelPosition(node);
 		return node;
-	}, 100);
+	}, 500);
 
 	updateElement(node:M) {
 		const ele = super.updateElement(node);

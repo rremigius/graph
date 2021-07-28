@@ -11,11 +11,8 @@ export default class StandardNodeModel extends StandardEntityModel {
 	@property(Number)
 	y?:number;
 
-	@property(Boolean)
-	fixed?:boolean;
-
 	@property(StandardNodeModel, {reference})
-	group?:StandardNodeModel;
+	parent?:StandardNodeModel;
 
 	toString() {
 		const label = this.label ? ':' + this.label : '';

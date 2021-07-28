@@ -4,8 +4,8 @@ export default {
 	fields: [{
 		type: "input",
 		inputType: "text",
-		label: "ID",
-		model: "id",
+		label: "GID",
+		model: "gid",
 		readonly: true,
 		featured: false,
 		disabled: true

@@ -9,4 +9,13 @@ export default class Node extends StandardNodeModel {
 	link?:Node;
 	@property(String)
 	owner?:string;
+
+	@property(String)
+	title?:string;
+
+	@property(String)
+	description?:string;
+
+	@property(String)
+	url?:string;
 }

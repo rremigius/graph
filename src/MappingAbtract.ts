@@ -155,6 +155,10 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 		return this.models.find(node => this.isMappingModel(node) && this.getId(node) === element.id()) as M;
 	}
 
+	getModelByGid(gid:alphanumeric) {
+		return this.model.$registry.byGid(gid);
+	}
+
 	getId(node:Mozel):string {
 		return node.gid.toString();
 	}
