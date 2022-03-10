@@ -22,35 +22,38 @@ const cy = cytoscape({
 	style: style
 });
 
-const model = GraphModel.create({gid: 'root'}); // Create root element for sync to build on
+// Create an empty model with just the root element
+const model = GraphModel.create({gid: 'root'});
+
+// Setup two-way node and edge mapping between model and cytoscape
 const nodeMapping = new NodeMapping(cy, model, model.nodes);
 const edgeMapping = new EdgeMapping(cy, model, model.edges);
 
 // Loading initial set of nodes: watch the nodes, wait for all nodes to be added, then zoom to fit.
-const watcher = model.$watch('nodes.*', _.debounce(() => { // debounce to wait for last node
+const watcher = model.$watch('nodes.*', _.debounce(() => { // debounce to wait until last node is added
 	model.$removeWatcher(watcher); // only once
 	cy.fit();
 }, 100));
 
-// Check for changes in layout to update UI
+// Watch for changes in layout to update UI
 model.$watch('layout', ({newValue}) => {
 	// This will only change displayed value in the dropdown; to actually apply a layout, `applyLayout` must be called
 	document.querySelector('.layout-name').innerHTML = newValue;
 });
 
-// Start online session
+// Setup online session
 const session = window.location.hash.substring(1); // Get everything after the hashtag (#) in the url
-const client = new MozelSyncClient(model, "localhost:3000", session);
+const client = new MozelSyncClient(model, "188.166.57.139:3000", session);
 
 // When cytoscape is ready, start loading the data
 cy.ready(async function() {
-	// Ready to map model to cytoscape
+	// Ready mapping between model and cytoscape
 	nodeMapping.start();
 	edgeMapping.start();
 
 	if(!session.length) {
 		// If we started the session, load the initial graph data
-		const response = await fetch('data/data.json');
+		const response = await fetch('data/data.json'); // can be from anywhere
 		const data = await response.json();
 		model.$setData(data);
 		applyLayout('cose');
@@ -58,6 +61,9 @@ cy.ready(async function() {
 
 	// Start online session
 	await client.start();
+
+	// If url did not have a hashtag yet, it will now set it to the session ID.
+	// URL can be shared with others to let them join.
 	window.location.hash = '#' + client.session;
 });
 
