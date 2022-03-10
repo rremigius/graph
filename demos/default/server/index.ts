@@ -2,7 +2,7 @@ import StandardGraphModel from "../../../src/models/StandardGraphModel";
 import MozelSyncServerHub from "mozel-sync/dist/MozelSyncServerHub";
 import {Namespace, Server} from "socket.io";
 import ModelFactory from "../ModelFactory";
-import {get} from "../../../src/utils";
+import {get} from "lodash";
 
 const server = require('http').createServer();
 const io = require('socket.io')(server, {

@@ -118,8 +118,8 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 
 	protected addItem(model:M) {
-		log.log(`Model added: ${model}`)
 		this.createElement(model);
+		log.log(`Model added: ${model}`)
 
 		if(!(model.gid in this.modelWatchers)) this.modelWatchers[model.gid] = [];
 		this.modelWatchers[model.gid].push(model.$watch('*', () => {
@@ -214,9 +214,12 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 
 	updateElement(model:M) {
-		const ele = this.getElement(model);
+		let ele = this.getElement(model);
 		if(!ele) {
-			return;
+			if(!this.shouldHaveElement(model)) {
+				return;
+			}
+			ele = this.createElement(model);
 		}
 		log.log(`Updating element: ${model}`);
 
@@ -253,7 +256,7 @@ export default abstract class MappingAbstract<M extends Mozel, E extends NodeSin
 	}
 
 	updateNextTick(entity:M) {
-		log.log(`Updating entity next tick: ${entity}`);
+		log.log(`Updating entity next tick: ${entity}`, entity);
 		this.updatesNextTick[entity.gid] = entity;
 
 		setTimeout(()=>{

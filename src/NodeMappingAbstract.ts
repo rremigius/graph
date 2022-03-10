@@ -1,13 +1,17 @@
-import Mozel from "mozel";
+import Mozel, {alphanumeric} from "mozel";
 import {EventObject, NodeSingular} from "cytoscape";
-import log from "./Log";
+import Log from "./Log";
 import MappingAbstract from "./MappingAbtract";
 import {throttle} from "./utils";
+
+const log = Log.instance("node-mapping");
 
 export default abstract class NodeMappingAbstract<M extends Mozel> extends MappingAbstract<M, NodeSingular> {
 	abstract getParentId(model:M):string|undefined;
 	abstract getPosition(model:M):{x:number, y:number};
 	abstract setPosition(model:M, x:number, y:number):void;
+
+	private moved:Set<alphanumeric> = new Set<alphanumeric>();
 
 	get reservedKeys() {
 		return super.reservedKeys.concat(['parent']);
@@ -23,10 +27,10 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		super.initCytoScapeToModel();
 		this.cy.on('position', this.onPosition);
 
-		// some layouts do not fire position/layoutready events so at least let's update the position when clicked
+		// some layouts do not fire position/layoutstop events so at least let's update the position when clicked
 		// to prevent it from jumping to its last known position
 		this.cy.on('click', this.onPosition);
-		this.cy.on('layoutready', this.onLayoutReady);
+		this.cy.on('layoutstop', this.onLayoutStop);
 	}
 
 	setGrabbable(model:M) {
@@ -49,20 +53,25 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		super.stop();
 		this.cy.off('position', this.onPosition);
 		this.cy.off('click', this.onPosition);
-		this.cy.off('layoutready', this.onLayoutReady);
+		this.cy.off('layoutstop', this.onLayoutStop);
 	}
 
-	onLayoutReady = (event:EventObject) => {
+	onLayoutStop = (event:EventObject) => {
 		this.updateModelPositions();
 	};
 
-	onPosition = throttle((event:EventObject) => {
+	onPosition = (event:EventObject) => {
+		if(!this.isNode(event.target)) return;
+
 		const node = this.getModel(event.target);
 		if(!node) return;
-		log.log(`Updating node position: ${node}`);
-		this.updateModelPosition(node);
+
+		// Add node to be updated
+		this.moved.add(node.gid);
+		this.updateModelPositions();
+
 		return node;
-	}, 500);
+	}
 
 	updateElement(node:M) {
 		const ele = super.updateElement(node);
@@ -105,8 +114,10 @@ export default abstract class NodeMappingAbstract<M extends Mozel> extends Mappi
 		this.setPosition(node, x, y);
 	}
 
-	updateModelPositions() {
-		this.models.each(model => this.updateModelPosition(model));
-	}
+	updateModelPositions = throttle(() => {
+		log.log("Updating node position(s)");
+		this.models.filter(model => this.moved.has(model.gid)).forEach(model => this.updateModelPosition(model));
+		this.moved.clear();
+	}, 500);
 }
 

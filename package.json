@@ -38,7 +38,8 @@
     "webpack-cli": "^4.7.2"
   },
   "scripts": {
-    "start": "webpack",
+    "start": "node -r esm -r ts-node/register demos/default/server/index.ts",
+    "build": "webpack",
     "update-all": "npm run update-mozel && npm run update-mozel-component && npm run update-mozel-form && npm run update-mozel-sync",
     "update-mozel": "npm remove mozel && npm i https://github.com/rremigius/mozel.git",
     "update-mozel-sync": "npm remove mozel-sync && npm i https://github.com/rremigius/mozel-sync.git",
