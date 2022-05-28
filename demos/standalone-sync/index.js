@@ -35,6 +35,12 @@ const watcher = model.$watch('nodes.*', _.debounce(() => { // debounce to wait u
 	cy.fit();
 }, 100));
 
+// If layout is changed (from external), zoom to fit
+model.$watch('layout', ({newValue}) => {
+	console.log(`Layout changed to ${newValue}. Zooming to fit.`);
+	cy.fit();
+});
+
 // Watch for changes in layout to update UI
 model.$watch('layout', ({newValue}) => {
 	// This will only change displayed value in the dropdown; to actually apply a layout, `applyLayout` must be called

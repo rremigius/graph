@@ -19,9 +19,11 @@ import {
 import Mozel from "mozel";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
 
+import {isComplexValue} from "mozel/dist/Property";
+
 (window as any).Graph = {
 	Log,
-	Mozel,
+	Mozel, isComplexValue,
 	check,
 	StandardEdgeModel, StandardNodeModel, StandardNodeMapping, StandardEdgeMapping, StandardGraphModel,
 	StandardEntityModel, NodeMappingAbstract, EdgeMappingAbstract, MappingAbstract, NodeToEdgeMappingAbstract,

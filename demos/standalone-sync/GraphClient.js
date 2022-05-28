@@ -1,5 +1,6 @@
 const {
-	Log
+	Log,
+	isComplexValue
 } = window.Graph;
 
 const log = Log.instance("graph-client");
@@ -65,21 +66,22 @@ export default class MozelSyncClient {
 	setFullState(state) {
 		const changes = {};
 		const changeListener = this._remote.$events.changed.on(event => {
-			const path = event.path.join(".");
-			changes[path] = this._model.$path(path);
+			const value = this._model.$path(event.path);
+			changes[event.path] = isComplexValue(value) ? value.$export() : value;
 		});
 		this._remote.$setData(state);
 		this._remote.$events.changed.off(changeListener);
-		log.log("New model: ", this._remote);
-		log.log("Changes: ", changes);
-		const watcher = this._model.$watch('*', ({newValue, oldValue, changePath}) => {
-			// If a value in the remote model is unchanged but changed in the local model, we do not want to overwrite it.
-			if(!(changePath in changes)) {
-				return false;
-			}
-			return true;
+
+		// Create temporary change validator to prevent unchanged remote values to overwrite local changes
+		const watcher = this._model.$watch('*', (change) => {
+			log.log(`Remote value rejected in favour of local change (${change.changePath}).`);
+			return change.changePath in changes;
 		}, {deep: true, validator: true});
+
+		// Apply remote changes
 		this._model.$setData(this._remote.$export());
+
+		// Remove temporary watcher
 		this._model.$removeWatcher(watcher);
 	}
 
@@ -112,6 +114,8 @@ export default class MozelSyncClient {
 	throttledSync = _.debounce(() => {
 		const state = this.createFullState();
 		log.info("Sending full state to server", state);
+
+		// Send state to server
 		this._io.emit('full-state', state);
 	}, 500, {leading: false, trailing: true});
 

@@ -1,9 +1,10 @@
 import GraphModel from "../data/GraphModel";
 import EventInterface from "event-interface-mixin";
 import Log from "log-control";
-import { check } from "validation-kit";
+import {check, isPrimitive} from "validation-kit";
 import {IS_OBJECT, IS_STRING} from "validation-kit/dist/validators";
 import {isObject, isFunction} from "lodash";
+import {isComplexValue} from "mozel/dist/Property";
 
 const log = Log.instance("graph-server");
 
@@ -78,7 +79,6 @@ export default class GraphServer {
 		log.log(`Sending connection info to ${socket.id}.`);
 		socket.emit('connected', {id: socket.id});
 
-		log.log(`Sending full state to ${socket.id}.`);
 		this.sendFullState(socket);
 	}
 
@@ -99,8 +99,25 @@ export default class GraphServer {
 	}
 
 	handleFullState(socket, update) {
-		this.model.$setData(update);	// Update internally
-		this.sendFullState();			// Then broadcast to everyone
+		// Temporarily track changes
+		const changes = {};
+		const listener = this.model.$events.changed.on(event => {
+			const value = this.model.$path(event.path);
+			changes[event.path] = isComplexValue(value) ? value.$export() : value;
+		});
+
+		// Update internal model
+		this.model.$setData(update);
+
+		// Stop tracking changes
+		this.model.$events.changed.off(listener);
+
+		if(Object.keys(changes).length > 0) {
+			// If anything changed, broadcast new state to everyone
+			this.sendFullState();
+		} else {
+			log.log(`No changes in update from ${socket.id}.`);
+		}
 	}
 
 	destroy() {
