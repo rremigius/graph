@@ -1,0 +1,170 @@
+<html>
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<link rel="stylesheet" type="text/css" href="style.css"></style>
+
+	<!-- Bootstrap -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+	<!-- Lodash -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<!-- MD5 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js" integrity="sha512-Hmp6qDy9imQmd15Ds1WQJ3uoyGCUz5myyr5ijainC1z+tP7wuXcze5ZZR3dF7+rkRALfNy7jcfgS5hH8wJ/2dQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<!-- Cytoscape -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.19.0/cytoscape.min.js" integrity="sha512-TOWs340KHbJjY/a2SCtsUcXYBg7/xPX72NKpJ3VITogkHJTy2yMyoJE0pxJjumMGHCg46ud89KO5q1Toe3Aeaw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<!-- Cytoscape context menus -->
+	<script src="https://cdn.jsdelivr.net/npm/cytoscape-context-menus@4.1.0/cytoscape-context-menus.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cytoscape-context-menus@4.1.0/cytoscape-context-menus.css">
+
+	<!-- Cytoscape edge handles -->
+	<script src="https://cdn.jsdelivr.net/npm/cytoscape-edgehandles@3.6.0/cytoscape-edgehandles.min.js"></script>
+
+	<!-- Cytoscape canvas -->
+	<script src="https://cdn.jsdelivr.net/npm/cytoscape-canvas@3.0.1"></script>
+
+	<!-- Lodash -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<!-- Vue -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+	<!-- Vue Form Generator -->
+	<script src="https://cdn.jsdelivr.net/npm/vue-form-generator@2.3.4/dist/vfg.min.js"></script>
+
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+   <script src="http://localhost/node_modules/file-saver/src/FileSaver.js"></script>
+  
+   <script type="module" src="readfile.js"></script>  
+   <script src="https://cdn.jsdelivr.net/npm/d3/dist/d3.js"></script>
+   <script type="module">import jstest  from './readfile.js'; </script>
+
+</head>
+<body>
+<!-- Menu -->
+<nav id="menu" class="navbar navbar-expand-lg navbar-light bg-light">
+	<div class="container-fluid">
+		<a class="navbar-brand" id="gtitle" href="#">Graph</a>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		  <div id="gtitle"></div>
+			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						Selecteer een voorbeeld: <span class="layout-name"></span>
+					</a>
+					<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+ 	 					<li><a class="dropdown-item" href="#" onclick="graph.fetchFile('Model-leeg.json')">Model Leeg (fetchFile</a></li>
+						<li><a class="dropdown-item" href="#" onclick="graph.fetchFile('Model-data.json')">Model data (fetchFile)</a></li>																						
+ 	 					<li><a class="dropdown-item" href="#" onclick="graph.fetchFile('Model-basis.json')">Model Basis (fetchFile)</a></li>										
+						<li><a class="dropdown-item" href="#" onclick="graph.fetchFile2('Basis.json')">Basis (fetchfile2)</a></li>									
+						<li><a class="dropdown-item" href="#" onclick="graph.fetchFile3('Burgers_en_politiek.json')">Politiek (fetchFile3</a></li>					
+						<li><a class="dropdown-item" href="#" onclick="graph.fetchFile3('Discussie-model.json')">Discussie-model (fetchfile3)</a></li>					
+					</ul>
+				</li>
+			</ul>
+			<div class="upload">
+				<input type="file" onchange="graph.fileread(this)" id="file-input" />	
+			   <pre id="file-content"></pre>
+   		</div>  
+			<div>		
+				<form class="d-flex" onsubmit="graph.filter()">
+					<input id="search" class="form-control me-2" type="search" placeholder="Search title" aria-label="Search">
+				</form>
+			</div>
+		</div>
+	</div>
+	</nav>
+
+
+
+<div id="graph"  class="row cy"></div>
+<div id="sidebar">
+
+<div id="pxg-eg"  class="row cy"></div>
+<div id="graph2">
+	  <div id="help" title="Show help" style="position: absolute; top: 3px; left: calc(100% - 28px)">
+	    <svg width="25" height="25" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+	      <path d="M11 3A8 8 0 0 0 3 11 8 8 0 0 0 11 19 8 8 0 0 0 19 11 8 8 0 0 0 11 3M10.994 6.5C11.758 6.5 12.379 6.719 12.857 7.158 13.336 7.589 13.576 8.142 13.576 8.816 13.576 9.109 13.495 9.406 13.336 9.707 13.176 10.01 13.03 10.223 12.908 10.354 12.791 10.475 12.623 10.635 12.404 10.83L12.342 10.891C11.83 11.338 11.572 11.785 11.572 12.232V12.719H10.389V12.146C10.389 11.781 10.469 11.467 10.629 11.207 10.788 10.939 11.07 10.625 11.473 10.268 11.699 10.06 11.859 9.914 11.951 9.816 12.05 9.711 12.148 9.569 12.24 9.391 12.341 9.204 12.393 9.01 12.393 8.816 12.393 8.442 12.266 8.142 12.01 7.914 11.77 7.686 11.431 7.572 10.994 7.572 10.272 7.572 9.776 7.964 9.508 8.744L8.424 8.305C8.6 7.841 8.904 7.426 9.332 7.06 9.769 6.687 10.322 6.5 10.994 6.5M10.98 13.842C11.224 13.842 11.426 13.923 11.586 14.09 11.754 14.249 11.838 14.442 11.838 14.67 11.838 14.898 11.754 15.09 11.586 15.256 11.426 15.418 11.224 15.5 10.98 15.5 10.737 15.5 10.531 15.418 10.363 15.256 10.204 15.09 10.125 14.898 10.125 14.67 10.125 14.442 10.204 14.249 10.363 14.09 10.531 13.923 10.737 13.842 10.98 13.842" transform="translate(0-.002)" fill="#4d4d4d" fill-rule="evenodd"/>
+	    </svg>
+	  </div>
+</div
+<!-- Form -->
+
+<!-- Button trigger modal -->
+<button id="showGraphForm" type="button" class="btn btn-primary" onclick="graph.showGraphForm()">
+	Settings
+</button>
+<button id="showNodeForm" type="button" class="btn btn-primary">
+	Add Node
+</button>
+<button id="showGroupForm" type="button" class="btn btn-primary" onclick="graph.showGroupForm()">
+	Add Group
+</button>
+<button type="button" class="btn btn-primary" id="save">
+	Save graph
+</button>
+<button type="button" class="btn btn-primary" id="download">
+	Download as JSON
+</button>
+<button type="button" class="btn btn-primary" id="cy-download">
+	Download as cy.json
+</button>
+<button type="button" class="btn btn-primary" id="export">
+	Download as PNG
+</button>
+<button type="button" class="btn btn-primary" id="filter">
+	Filter by label
+</button>
+<div id="settings" title="Settings"></div>
+<div id="help-text">
+    <b>Context menu</b>:<br>
+    Right-click on a node to edit the node, remove the node or unlock it.
+    Right click on an edge to edit the edge
+    Richt click on the graph to create a node, a group or to save or download the graph
+    <br>
+    <b>Move a node</b>:<br>
+    Hover over a node. 
+    Click mouse-down on the green handle to move the node
+    <br>
+    <b>Create an edge</b>:<br>
+    Click on a node to select it.
+    Mouse-down on  the green handle to draw an arrow to another node.
+    Mouse-up at the target creates of form for editing the edge
+    Select a node or an edge by clicking it<br>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="modal-form" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+	<div id="form" class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="formModalLabel">Form</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div id="modal-body" class="modal-body">
+				<vue-form-generator ref="form" :schema="schema" :model="model" :options="formOptions" @validated="onValidated"></vue-form-generator>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" @click="onSubmit">Save changes</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+<div> 
+
+<div id="container" style="position:absolute;top:10;left:10;z-index:1"></div>
+
+<script type="module" src="demo.js"></script>
+<script type="module" src="index.js"></script>
+
+
+</body>
+</html>

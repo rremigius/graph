@@ -7,7 +7,7 @@ import NodeMapping from "./NodeMapping.js";
 import EdgeMapping from "./EdgeMapping.js";
 import GraphModel from "./data/GraphModel.js";
 
-const { MozelSyncClient } = window.Graph;
+import GraphClient from "./GraphClient.js"
 
 const LAYOUTS = {
 	cose: {
@@ -42,8 +42,8 @@ model.$watch('layout', ({newValue}) => {
 });
 
 // Setup online session
-const session = window.location.hash.substring(1); // Get everything after the hashtag (#) in the url
-const client = new MozelSyncClient(model, "188.166.57.139:3000", session);
+const sessionID = window.location.hash.substring(1); // Get everything after the hashtag (#) in the url
+const client = new GraphClient(model, "localhost:3000", sessionID);
 
 // When cytoscape is ready, start loading the data
 cy.ready(async function() {
@@ -51,7 +51,11 @@ cy.ready(async function() {
 	nodeMapping.start();
 	edgeMapping.start();
 
-	if(!session.length) {
+	// Start online session
+	await client.start();
+
+	// Wait with first layout until client has connected, or changes will not be synced to server
+	if(!sessionID.length) {
 		// If we started the session, load the initial graph data
 		const response = await fetch('data/data.json'); // can be from anywhere
 		const data = await response.json();
@@ -59,12 +63,9 @@ cy.ready(async function() {
 		applyLayout('cose');
 	}
 
-	// Start online session
-	await client.start();
-
 	// If url did not have a hashtag yet, it will now set it to the session ID.
 	// URL can be shared with others to let them join.
-	window.location.hash = '#' + client.session;
+	window.location.hash = '#' + client.getSessionID();
 });
 
 cy.contextMenus({

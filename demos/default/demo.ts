@@ -13,7 +13,7 @@ import StandardEdgeMapping from "../../src/mappings/StandardEdgeMapping";
 import NodeToEdgeMapping from "../../src/mappings/NodeToEdgeMapping";
 import ModelFactory from "./ModelFactory";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
-import DATA from "./server/data-small";
+import DATA from "./server/data";
 import {get} from "../../src/utils";
 import Node from "./Node";
 import StandardNodeModel from "../../src/models/StandardNodeModel";

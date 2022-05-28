@@ -1,4 +1,5 @@
 import {check} from "validation-kit";
+import Log from "log-control";
 import {
 	EdgeMappingAbstract, MappingAbstract,
 	NodeMappingAbstract,
@@ -19,6 +20,7 @@ import Mozel from "mozel";
 import MozelSyncClient from "mozel-sync/dist/MozelSyncClient";
 
 (window as any).Graph = {
+	Log,
 	Mozel,
 	check,
 	StandardEdgeModel, StandardNodeModel, StandardNodeMapping, StandardEdgeMapping, StandardGraphModel,

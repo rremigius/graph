@@ -1,0 +1,175 @@
+{
+	"elements": {
+		"nodes": [
+			{
+				"data": {
+					"x": -197.53383974293993,
+					"y": 12.171631961432265,
+					"title": "Probleem",
+					"label": "Probleem",
+					"id": "e1e56f10-5c77-4a00-9a07-d82422c541ca"
+				},
+				"position": {
+					"x": -197.53383974293993,
+					"y": 12.171631961432265
+				},
+				"group": "nodes",
+				"removed": false,
+				"selected": false,
+				"selectable": true,
+				"locked": true,
+				"grabbable": true,
+				"pannable": false,
+				"classes": "entity eh-preview-active"
+			},
+			{
+				"data": {
+					"x": -146.9663406500806,
+					"y": 328.2185012918039,
+					"title": "Oplossing",
+					"label": "Oplossing",
+					"id": "528686dc-8b48-4311-98ab-26c8cf9b87b8"
+				},
+				"position": {
+					"x": -146.9663406500806,
+					"y": 328.2185012918039
+				},
+				"group": "nodes",
+				"removed": false,
+				"selected": false,
+				"selectable": true,
+				"locked": true,
+				"grabbable": true,
+				"pannable": false,
+				"classes": "entity eh-preview-active"
+			}
+		],
+		"edges": [
+			{
+				"data": {
+					"source": "528686dc-8b48-4311-98ab-26c8cf9b87b8",
+					"target": "e1e56f10-5c77-4a00-9a07-d82422c541ca",
+					"label": "Lost op",
+					"data": {
+						"source": "528686dc-8b48-4311-98ab-26c8cf9b87b8",
+						"target": "e1e56f10-5c77-4a00-9a07-d82422c541ca",
+						"label": "Lost op"
+					},
+					"id": "3065d06c-2fa7-4a70-a648-84a0851d2142"
+				},
+				"position": {
+					"x": 0,
+					"y": 0
+				},
+				"group": "edges",
+				"removed": false,
+				"selected": false,
+				"selectable": true,
+				"locked": false,
+				"grabbable": true,
+				"pannable": true,
+				"classes": "entity"
+			}
+		]
+	},
+	"style": [
+		{
+			"selector": "node",
+			"style": {
+				"border-width": "1px",
+				"border-color": "rgb(204,204,204)",
+				"background-color": "fn",
+				"width": "label",
+				"height": "label",
+				"padding": "5px",
+				"shape": "roundrectangle"
+			}
+		},
+		{
+			"selector": "[label]",
+			"style": {
+				"label": "data(label)",
+				"text-halign": "center",
+				"text-valign": "center",
+				"text-max-width": "200px",
+				"font-size": "30",
+				"text-wrap": "wrap",
+				"color": "rgb(255,255,255)"
+			}
+		},
+		{
+			"selector": "[title]",
+			"style": {
+				"label": "data(title)"
+			}
+		},
+		{
+			"selector": "edge",
+			"style": {
+				"label": "fn",
+				"target-arrow-shape": "triangle",
+				"curve-style": "bezier",
+				"arrow-scale": "1.5",
+				"width": "10px",
+				"line-color": "fn",
+				"color": "rgb(128,128,128)",
+				"font-size": "20",
+				"text-wrap": "wrap",
+				"text-rotation": "autorotate",
+				"text-background-opacity": "0"
+			}
+		},
+		{
+			"selector": "node:parent",
+			"style": {
+				"background-blacken": "-0.5",
+				"color": "rgb(0,0,0)",
+				"text-halign": "left",
+				"text-valign": "top"
+			}
+		},
+		{
+			"selector": ":selected",
+			"style": {
+				"background-blacken": "0.5"
+			}
+		},
+		{
+			"selector": "node.eh-handle",
+			"style": {
+				"background-color": "rgb(77,255,0)",
+				"height": "20px",
+				"width": "20px"
+			}
+		},
+		{
+			"selector": "node.eh-handle:selected",
+			"style": {
+				"background-color": "rgb(71,183,213)",
+				"height": "40px",
+				"width": "40px"
+			}
+		}
+	],
+	"data": {
+		"title": "Basis",
+		"background": "blank.jpg",
+		"layout": "cose",
+		"groups": []
+	},
+	"zoomingEnabled": true,
+	"userZoomingEnabled": true,
+	"zoom": 2.0025240753134734,
+	"minZoom": 1e-50,
+	"maxZoom": 1e+50,
+	"panningEnabled": true,
+	"userPanningEnabled": true,
+	"pan": {
+		"x": 794.9317974992873,
+		"y": 48.68028158061668
+	},
+	"boxSelectionEnabled": true,
+	"renderer": {
+		"name": "canvas"
+	}
+}

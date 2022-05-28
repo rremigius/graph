@@ -1,0 +1,15 @@
+{
+	"gid": "root",
+	"nodes": [
+		{"gid": 1, "label": "A"},
+		{"gid": 2, "label": "B"},
+		{"gid": 3, "label": "C"},
+		{"gid": 4, "label": "D"}
+	],
+	"edges": [
+		{"gid": 12, "label": "AB", "source": {"gid": 1}, "target": {"gid": 2}},
+		{"gid": 23, "label": "BC", "source": {"gid": 2}, "target": {"gid": 3}},
+		{"gid": 31, "label": "CA", "source": {"gid": 3}, "target": {"gid": 1}},
+		{"gid": 45, "label": "DB", "source": {"gid": 4}, "target": {"gid": 2}}
+	]
+}

@@ -15,3 +15,5 @@ export {
 	has,
 	throttle
 } from "lodash";
+
+export * as Validation from "validation-kit";
