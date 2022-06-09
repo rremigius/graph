@@ -10,6 +10,10 @@ export default class NodeMapping extends NodeMappingAbstract {
 	}
 
 	getPosition(node){
+		const element = this.getElement(node);
+		if(element.grabbed()) { // if node is being grabbed, it should not get updated by the model
+			return {x: element.position().x, y: element.position().y}
+		}
 		return {x: node.x, y: node.y};
 	}
 	setPosition(node, x, y) {

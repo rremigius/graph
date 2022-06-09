@@ -73,7 +73,7 @@ export default class MozelSyncClient {
 		this._remote.$events.changed.off(changeListener);
 
 		// Create temporary change validator to prevent unchanged remote values to overwrite local changes
-		const watcher = this._model.$watch('*', (change) => {
+		const validator = this._model.$watch('*', (change) => {
 			log.log(`Remote value rejected in favour of local change (${change.changePath}).`);
 			return change.changePath in changes;
 		}, {deep: true, validator: true});
@@ -82,7 +82,7 @@ export default class MozelSyncClient {
 		this._model.$setData(this._remote.$export());
 
 		// Remove temporary watcher
-		this._model.$removeWatcher(watcher);
+		this._model.$removeWatcher(validator);
 	}
 
 	async start() {

@@ -37,8 +37,11 @@ const watcher = model.$watch('nodes.*', _.debounce(() => { // debounce to wait u
 
 // If layout is changed (from external), zoom to fit
 model.$watch('layout', ({newValue}) => {
-	console.log(`Layout changed to ${newValue}. Zooming to fit.`);
-	cy.fit();
+	console.log(`Layout changed to ${newValue}.`);
+	setTimeout(() => {
+		console.log(`Zoom to fit after layout change.`);
+		cy.fit();
+	}, 1000); // we don't have an event to tell us when the update it finished exactly, so we use an arbitrary 1000ms
 });
 
 // Watch for changes in layout to update UI
