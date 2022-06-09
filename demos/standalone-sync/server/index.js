@@ -1,6 +1,3 @@
-import MozelSyncServerHub from "mozel-sync/dist/MozelSyncServerHub";
-
-import GraphModel from "../data/GraphModel"
 import GraphServerHub from "./GraphServerHub";
 
 // Setup an HTTP server with socket

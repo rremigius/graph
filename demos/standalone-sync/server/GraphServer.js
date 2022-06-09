@@ -1,4 +1,4 @@
-import GraphModel from "../data/GraphModel";
+import GraphModel from "./data/GraphModel";
 import EventInterface from "event-interface-mixin";
 import Log from "log-control";
 import {check, isPrimitive} from "validation-kit";

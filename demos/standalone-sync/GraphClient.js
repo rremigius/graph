@@ -10,7 +10,7 @@ export const State = {
 	CONNECTING: 'CONNECTING',
 	CONNECTED: 'CONNECTED'
 }
-export default class MozelSyncClient {
+export default class GraphClient {
 	constructor(model, server, sessionID = null) {
 		this._io = null;
 		this._model = model;

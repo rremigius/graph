@@ -4,13 +4,18 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node -r esm index.js",
+		"start": "pm2 start index.js --name graph-sync --node-args='-r esm'",
+		"stop": "pm2 stop graph-sync",
+		"status": "pm2 status",
+		"log": "pm2 log graph-sync",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Remi Alkemade",
 	"license": "ISC",
 	"dependencies": {
 		"mozel": "github:rremigius/mozel",
-		"mozel-sync": "github:rremigius/mozel-sync.git"
+		"mozel-sync": "github:rremigius/mozel-sync.git",
+		"pm2": "^5.2.0",
+		"validation-kit": "^0.0.5"
 	}
 }
