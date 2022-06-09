@@ -16,6 +16,6 @@
 		"mozel": "github:rremigius/mozel",
 		"mozel-sync": "github:rremigius/mozel-sync.git",
 		"pm2": "^5.2.0",
-		"validation-kit": "^0.0.5"
+		"validation-kit": "^0.0.9"
 	}
 }
